@@ -1,4 +1,4 @@
-package ru.yandex.practicum.shareit.validator;
+package ru.yandex.practicum.ewm.validator;
 
 public interface ValidationOnUpdate {
 }

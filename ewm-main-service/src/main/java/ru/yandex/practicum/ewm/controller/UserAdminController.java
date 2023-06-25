@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.UserDto;
 import ru.yandex.practicum.ewm.service.UserService;
-import ru.yandex.practicum.shareit.validator.ValidationOnCreate;
+import ru.yandex.practicum.ewm.validator.ValidationOnCreate;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;

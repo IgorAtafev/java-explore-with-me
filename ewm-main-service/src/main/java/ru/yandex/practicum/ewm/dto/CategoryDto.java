@@ -4,8 +4,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ru.yandex.practicum.shareit.validator.ValidationOnCreate;
-import ru.yandex.practicum.shareit.validator.ValidationOnUpdate;
+import ru.yandex.practicum.ewm.validator.ValidationOnCreate;
+import ru.yandex.practicum.ewm.validator.ValidationOnUpdate;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;

@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.CategoryDto;
 import ru.yandex.practicum.ewm.service.CategoryService;
-import ru.yandex.practicum.shareit.validator.ValidationOnCreate;
-import ru.yandex.practicum.shareit.validator.ValidationOnUpdate;
+import ru.yandex.practicum.ewm.validator.ValidationOnCreate;
+import ru.yandex.practicum.ewm.validator.ValidationOnUpdate;
 
 @RestController
 @RequestMapping("/admin/categories")
