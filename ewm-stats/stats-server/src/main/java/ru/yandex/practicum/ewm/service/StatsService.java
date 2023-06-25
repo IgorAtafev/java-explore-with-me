@@ -12,6 +12,7 @@ public interface StatsService {
      * Creates a new endpoint hit
      *
      * @param endpointHitDto
+     * @return new endpoint hit
      */
     EndpointHitDto saveEndpointHit(EndpointHitDto endpointHitDto);
 
