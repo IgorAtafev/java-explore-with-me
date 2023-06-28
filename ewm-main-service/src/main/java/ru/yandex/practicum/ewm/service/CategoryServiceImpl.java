@@ -8,6 +8,7 @@ import ru.yandex.practicum.ewm.dto.CategoryDto;
 import ru.yandex.practicum.ewm.mapper.CategoryMapper;
 import ru.yandex.practicum.ewm.model.Category;
 import ru.yandex.practicum.ewm.repository.CategoryRepository;
+import ru.yandex.practicum.ewm.repository.EventRepository;
 import ru.yandex.practicum.ewm.validator.ConflictException;
 import ru.yandex.practicum.ewm.validator.NotFoundException;
 
@@ -19,6 +20,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
     private final CategoryMapper categoryMapper;
 
     @Transactional
@@ -56,6 +58,10 @@ public class CategoryServiceImpl implements CategoryService {
     public void removeCategoryById(Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new NotFoundException(String.format("Category with id %d does not exist", id));
+        }
+
+        if (eventRepository.existsByCategoryId(id)) {
+            throw new ConflictException(String.format("Category with id %s contains events", id));
         }
 
         categoryRepository.deleteById(id);

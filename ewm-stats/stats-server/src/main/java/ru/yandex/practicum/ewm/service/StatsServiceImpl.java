@@ -21,7 +21,6 @@ import java.util.Objects;
 import static ru.yandex.practicum.ewm.model.QEndpointHit.endpointHit;
 
 @Service
-@Transactional(readOnly = true)
 public class StatsServiceImpl implements StatsService {
 
     private final StatsRepository statsRepository;
@@ -40,6 +39,7 @@ public class StatsServiceImpl implements StatsService {
         return statsMapper.toDto(statsRepository.save(statsMapper.toEndpointHit(endpointHitDto)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         if (start.isAfter(end)) {
@@ -76,6 +76,6 @@ public class StatsServiceImpl implements StatsService {
 
         return conditions.stream()
                 .reduce(BooleanExpression::and)
-                .get();
+                .orElse(null);
     }
 }

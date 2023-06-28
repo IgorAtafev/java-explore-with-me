@@ -21,7 +21,7 @@ public class CategoryDto {
     private Long id;
 
     @NotBlank(
-            groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
+            groups = ValidationOnCreate.class,
             message = "Name cannot be empty and must contain at least one non-whitespace character"
     )
     @Size(

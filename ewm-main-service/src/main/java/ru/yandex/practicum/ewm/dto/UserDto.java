@@ -22,7 +22,7 @@ public class UserDto {
     @Null(groups = ValidationOnCreate.class, message = "Id must be null")
     private Long id;
 
-    @NotEmpty(groups = {ValidationOnCreate.class, ValidationOnUpdate.class}, message = "Email cannot be empty")
+    @NotEmpty(groups = ValidationOnCreate.class, message = "Email cannot be empty")
     @Email(groups = {ValidationOnCreate.class, ValidationOnUpdate.class}, message = "Email must be valid")
     @Size(
             groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
@@ -31,7 +31,7 @@ public class UserDto {
     private String email;
 
     @NotBlank(
-            groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
+            groups = ValidationOnCreate.class,
             message = "Name cannot be empty and must contain at least one non-whitespace character"
     )
     @Size(

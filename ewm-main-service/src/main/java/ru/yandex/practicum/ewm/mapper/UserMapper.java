@@ -3,6 +3,7 @@ package ru.yandex.practicum.ewm.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.ewm.dto.UserDto;
+import ru.yandex.practicum.ewm.dto.UserShortDto;
 import ru.yandex.practicum.ewm.model.User;
 
 import java.util.Collection;
@@ -18,6 +19,15 @@ public class UserMapper {
 
         userDto.setId(user.getId());
         userDto.setEmail(user.getEmail());
+        userDto.setName(user.getName());
+
+        return userDto;
+    }
+
+    public UserShortDto toShortDto(User user) {
+        UserShortDto userDto = new UserShortDto();
+
+        userDto.setId(user.getId());
         userDto.setName(user.getName());
 
         return userDto;

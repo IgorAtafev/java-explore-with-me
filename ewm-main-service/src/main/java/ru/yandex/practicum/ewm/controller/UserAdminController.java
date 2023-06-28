@@ -28,6 +28,7 @@ import java.util.List;
 @RequestMapping("/admin/users")
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class UserAdminController {
 
     private final UserService userService;
