@@ -1,6 +1,11 @@
 package ru.yandex.practicum.ewm.model;
 
-public enum StateAction {
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public enum EventStateAction {
 
     PUBLISH_EVENT(EventState.PUBLISHED),
     REJECT_EVENT(EventState.CANCELED),
@@ -8,12 +13,4 @@ public enum StateAction {
     CANCEL_REVIEW(EventState.CANCELED);
 
     private final EventState state;
-
-    StateAction(EventState state) {
-        this.state = state;
-    }
-
-    public EventState getState() {
-        return state;
-    }
 }

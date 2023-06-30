@@ -15,7 +15,6 @@ import ru.yandex.practicum.ewm.validator.NotFoundException;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
@@ -23,7 +22,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final EventRepository eventRepository;
     private final CategoryMapper categoryMapper;
 
-    @Transactional
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
         Category category = categoryMapper.toCategory(categoryDto);

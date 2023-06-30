@@ -14,7 +14,6 @@ import ru.yandex.practicum.ewm.validator.NotFoundException;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 

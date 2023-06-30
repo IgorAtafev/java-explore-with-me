@@ -3,7 +3,7 @@ package ru.yandex.practicum.ewm.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
-import ru.yandex.practicum.ewm.dto.EventRequestDto;
+import ru.yandex.practicum.ewm.dto.EventForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.model.Event;
 
@@ -35,7 +35,7 @@ public class EventMapper {
         eventDto.setPublishedOn(event.getPublishedOn());
         eventDto.setState(event.getState());
         eventDto.setConfirmedRequests(event.getConfirmedRequests());
-        eventDto.setCreatedOn(event.getCreatedOn());
+        eventDto.setCreatedOn(event.getCreated());
 
         return eventDto;
     }
@@ -67,7 +67,7 @@ public class EventMapper {
                 .collect(Collectors.toList());
     }
 
-    public Event toEvent(EventRequestDto eventDto) {
+    public Event toEvent(EventForRequestDto eventDto) {
         Event event = new Event();
 
         event.setId(eventDto.getId());

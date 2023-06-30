@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
-import ru.yandex.practicum.ewm.dto.EventRequestDto;
+import ru.yandex.practicum.ewm.dto.EventForRequestDto;
+import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateRequest;
+import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateResult;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
+import ru.yandex.practicum.ewm.dto.ParticipationRequestDto;
 import ru.yandex.practicum.ewm.service.EventService;
 import ru.yandex.practicum.ewm.validator.ValidationOnCreate;
 import ru.yandex.practicum.ewm.validator.ValidationOnUpdate;
@@ -40,20 +43,20 @@ public class EventPrivateController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(
             @PathVariable Long userId,
-            @RequestBody @Validated(ValidationOnCreate.class) EventRequestDto eventRequestDto
+            @RequestBody @Validated(ValidationOnCreate.class) EventForRequestDto eventForRequestDto
     ) {
-        log.info("Request received POST /users/{}/events: '{}'", userId, eventRequestDto);
-        return eventService.createEvent(userId, eventRequestDto);
+        log.info("Request received POST /users/{}/events: '{}'", userId, eventForRequestDto);
+        return eventService.createEvent(userId, eventForRequestDto);
     }
 
     @PatchMapping("/{id}")
     public EventFullDto updateEventById(
             @PathVariable Long userId,
             @PathVariable Long id,
-            @RequestBody @Validated(ValidationOnUpdate.class) EventRequestDto eventRequestDto
+            @RequestBody @Validated(ValidationOnUpdate.class) EventForRequestDto eventForRequestDto
     ) {
-        log.info("Request received PATCH /users/{}/events/{}: '{}'", userId, id, eventRequestDto);
-        return eventService.updateUserEvent(userId, id, eventRequestDto);
+        log.info("Request received PATCH /users/{}/events/{}: '{}'", userId, id, eventForRequestDto);
+        return eventService.updateUserEvent(userId, id, eventForRequestDto);
     }
 
     @GetMapping
@@ -70,5 +73,20 @@ public class EventPrivateController {
     @GetMapping("/{id}")
     public EventFullDto getEventById(@PathVariable Long userId, @PathVariable Long id) {
         return eventService.getUserEventById(userId, id);
+    }
+
+    @PatchMapping("/{id}/requests")
+    public EventRequestStatusUpdateResult updateRequestsStatus(
+            @PathVariable Long userId,
+            @PathVariable Long id,
+            @RequestBody @Validated(ValidationOnUpdate.class) EventRequestStatusUpdateRequest requestsDto
+    ) {
+        log.info("Request received PATCH /users/{}/events/{}/requests: '{}'", userId, id, requestsDto);
+        return eventService.updateRequestsStatus(userId, id, requestsDto);
+    }
+
+    @GetMapping("/{id}/requests")
+    public List<ParticipationRequestDto> getRequests(@PathVariable Long userId, @PathVariable Long id) {
+        return eventService.getRequests(userId, id);
     }
 }

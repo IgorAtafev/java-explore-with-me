@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import ru.yandex.practicum.ewm.model.Location;
-import ru.yandex.practicum.ewm.model.StateAction;
+import ru.yandex.practicum.ewm.model.EventStateAction;
 import ru.yandex.practicum.ewm.validator.ValidationOnCreate;
 import ru.yandex.practicum.ewm.validator.ValidationOnUpdate;
 
@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class EventRequestDto {
+public class EventForRequestDto {
 
     @Null(groups = ValidationOnCreate.class, message = "Id must be null")
     private Long id;
@@ -89,5 +89,5 @@ public class EventRequestDto {
     private Boolean requestModeration;
 
     @Null(groups = ValidationOnCreate.class, message = "State action must be null")
-    private StateAction stateAction;
+    private EventStateAction stateAction;
 }

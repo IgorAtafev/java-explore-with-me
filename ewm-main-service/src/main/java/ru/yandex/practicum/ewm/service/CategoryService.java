@@ -50,7 +50,7 @@ public interface CategoryService {
      * If the category is not found throws NotFoundException
      *
      * @param id
-     * @return category by id
+     * @return category
      */
     CategoryDto getCategoryById(Long id);
 }
