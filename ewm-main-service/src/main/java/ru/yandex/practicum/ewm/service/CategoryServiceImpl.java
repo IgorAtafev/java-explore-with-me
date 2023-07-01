@@ -35,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @Override
-    public CategoryDto updateCategoryById(Long id, CategoryDto categoryDto) {
+    public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
         Category category = categoryMapper.toCategory(categoryDto);
 
         if (!categoryRepository.existsById(id)) {
@@ -53,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @Override
-    public void removeCategoryById(Long id) {
+    public void removeCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
             throw new NotFoundException(String.format("Category with id %d does not exist", id));
         }

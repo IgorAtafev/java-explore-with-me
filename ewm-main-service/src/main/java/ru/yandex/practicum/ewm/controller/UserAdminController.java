@@ -42,9 +42,9 @@ public class UserAdminController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeUserById(@PathVariable Long id) {
+    public void removeUser(@PathVariable Long id) {
         log.info("Request received DELETE /admin/users/{}", id);
-        userService.removeUserById(id);
+        userService.removeUser(id);
     }
 
     @GetMapping

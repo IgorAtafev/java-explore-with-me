@@ -124,15 +124,6 @@ public interface EventService {
     List<ParticipationRequestDto> getRequests(Long userId, Long id);
 
     /**
-     * Returns a public event by id
-     * If the event is not found throws NotFoundException
-     *
-     * @param id
-     * @return event
-     */
-    EventFullDto getPublicEventById(Long id);
-
-    /**
      * Returns a list of public events
      * Results should be returned page by page
      *
@@ -147,4 +138,13 @@ public interface EventService {
      */
     List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid, Boolean onlyAvailable,
                                         LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable page);
+
+    /**
+     * Returns a public event by id
+     * If the event is not found throws NotFoundException
+     *
+     * @param id
+     * @return event
+     */
+    EventFullDto getPublicEventById(Long id);
 }

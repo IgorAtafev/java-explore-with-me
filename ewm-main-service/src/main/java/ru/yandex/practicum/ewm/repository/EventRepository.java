@@ -38,6 +38,14 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     Optional<Event> findByIdAndInitiatorId(Long id, Long initiatorId);
 
     /**
+     * Returns a list of events by ids
+     *
+     * @param ids
+     * @return list of events
+     */
+    List<Event> findByIdIn(List<Long> ids);
+
+    /**
      * Returns a list of events by initiator id
      *
      * @param initiatorId

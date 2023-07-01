@@ -263,18 +263,6 @@ public class EventServiceImpl implements  EventService {
     }
 
     @Override
-    public EventFullDto getPublicEventById(Long id) {
-        Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Public event with id %d does not exist", id)));
-
-        event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
-                id, ParticipationRequestStatus.CONFIRMED));
-
-        return eventMapper.toFullDto(event);
-    }
-
-    @Override
     public List<EventShortDto> getPublicEvents(
             String text, List<Long> categories, Boolean paid, Boolean onlyAvailable,
             LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable page
@@ -313,6 +301,18 @@ public class EventServiceImpl implements  EventService {
         List<Event> events = getEventsByCondition(conditions, page);
 
         return eventMapper.toShortDtos(events);
+    }
+
+    @Override
+    public EventFullDto getPublicEventById(Long id) {
+        Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(
+                () -> new NotFoundException(String.format(
+                        "Public event with id %d does not exist", id)));
+
+        event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
+                id, ParticipationRequestStatus.CONFIRMED));
+
+        return eventMapper.toFullDto(event);
     }
 
     private Event toEvent(Long userId, EventForRequestDto eventDto, EventState state, Event oldEvent) {

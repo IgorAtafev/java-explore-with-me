@@ -50,7 +50,7 @@ public class EventPrivateController {
     }
 
     @PatchMapping("/{id}")
-    public EventFullDto updateEventById(
+    public EventFullDto updateEvent(
             @PathVariable Long userId,
             @PathVariable Long id,
             @RequestBody @Validated(ValidationOnUpdate.class) EventForRequestDto eventForRequestDto

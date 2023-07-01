@@ -18,7 +18,7 @@ import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "participation_requests")
+@Table(name = "requests")
 @Getter
 @Setter
 @EqualsAndHashCode

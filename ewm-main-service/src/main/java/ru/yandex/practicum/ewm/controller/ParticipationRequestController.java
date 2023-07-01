@@ -32,9 +32,9 @@ public class ParticipationRequestController {
     }
 
     @PatchMapping("/{id}/cancel")
-    public ParticipationRequestDto cancelRequestById(@PathVariable Long userId, @PathVariable Long id) {
+    public ParticipationRequestDto cancelRequest(@PathVariable Long userId, @PathVariable Long id) {
         log.info("Request received PATCH /users/{}/requests/{}/cancel", userId, id);
-        return requestService.cancelRequestById(userId, id);
+        return requestService.cancelRequest(userId, id);
     }
 
     @GetMapping

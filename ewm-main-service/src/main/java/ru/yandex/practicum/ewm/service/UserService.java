@@ -22,7 +22,7 @@ public interface UserService {
      *
      * @param id
      */
-    void removeUserById(Long id);
+    void removeUser(Long id);
 
     /**
      * Returns a list of users

@@ -31,7 +31,7 @@ public interface ParticipationRequestService {
      * @param id
      * @return canceled participation request
      */
-    ParticipationRequestDto cancelRequestById(Long userId, Long id);
+    ParticipationRequestDto cancelRequest(Long userId, Long id);
 
     /**
      * Returns a list of user participation requests

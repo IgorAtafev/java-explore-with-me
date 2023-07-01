@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void removeUserById(Long id) {
+    public void removeUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new NotFoundException(String.format("User with id %d does not exist", id));
         }

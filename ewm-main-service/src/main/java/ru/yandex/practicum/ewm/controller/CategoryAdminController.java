@@ -33,18 +33,18 @@ public class CategoryAdminController {
     }
 
     @PatchMapping("/{id}")
-    public CategoryDto updateCategoryById(
+    public CategoryDto updateCategory(
             @PathVariable Long id,
             @RequestBody @Validated(ValidationOnUpdate.class) CategoryDto categoryDto
     ) {
         log.info("Request received PATCH /admin/categories/{}: '{}'", id, categoryDto);
-        return categoryService.updateCategoryById(id, categoryDto);
+        return categoryService.updateCategory(id, categoryDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeCategoryById(@PathVariable Long id) {
+    public void removeCategory(@PathVariable Long id) {
         log.info("Request received DELETE /admin/categories/{}", id);
-        categoryService.removeCategoryById(id);
+        categoryService.removeCategory(id);
     }
 }

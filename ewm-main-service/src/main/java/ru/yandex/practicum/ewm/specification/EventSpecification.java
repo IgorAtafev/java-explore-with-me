@@ -12,6 +12,9 @@ import java.util.List;
 
 public class EventSpecification {
 
+    private EventSpecification() {
+    }
+
     public static Specification<Event> findByInitiatorIdIn(List<Long> users) {
         return (root, query, cb) -> cb.in(root.<Long>get("initiator").get("id")).value(users);
     }

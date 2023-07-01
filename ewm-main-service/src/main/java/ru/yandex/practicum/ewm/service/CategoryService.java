@@ -25,7 +25,7 @@ public interface CategoryService {
      * @param categoryDto
      * @return updated category
      */
-    CategoryDto updateCategoryById(Long id, CategoryDto categoryDto);
+    CategoryDto updateCategory(Long id, CategoryDto categoryDto);
 
     /**
      * Removes a category
@@ -34,7 +34,7 @@ public interface CategoryService {
      *
      * @param id
      */
-    void removeCategoryById(Long id);
+    void removeCategory(Long id);
 
     /**
      * Returns a list of categories

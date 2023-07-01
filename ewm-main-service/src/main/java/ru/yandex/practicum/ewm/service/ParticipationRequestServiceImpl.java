@@ -74,7 +74,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     @Transactional
     @Override
-    public ParticipationRequestDto cancelRequestById(Long userId, Long id) {
+    public ParticipationRequestDto cancelRequest(Long userId, Long id) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(String.format("Requester with id %d does not exist", userId));
         }
