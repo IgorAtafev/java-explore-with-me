@@ -25,6 +25,7 @@ import ru.yandex.practicum.ewm.repository.EventRepository;
 import ru.yandex.practicum.ewm.repository.ParticipationRequestRepository;
 import ru.yandex.practicum.ewm.repository.UserRepository;
 import ru.yandex.practicum.ewm.specification.EventSpecification;
+import ru.yandex.practicum.ewm.util.EventRequestParam;
 import ru.yandex.practicum.ewm.validator.ConflictException;
 import ru.yandex.practicum.ewm.validator.NotFoundException;
 import ru.yandex.practicum.ewm.validator.ValidationException;
@@ -145,38 +146,35 @@ public class EventServiceImpl implements  EventService {
     }
 
     @Override
-    public List<EventFullDto> getEventsByAdmin(
-            List<Long> users, List<String> states, List<Long> categories,
-            LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable page
-    ) {
-        if (rangeStart != null && rangeEnd != null) {
-            checkRangeStartBeforeRangeEnd(rangeStart, rangeEnd);
+    public List<EventFullDto> getEventsByAdmin(EventRequestParam requestParam, Pageable page) {
+        if (requestParam.getRangeStart() != null && requestParam.getRangeEnd() != null) {
+            checkRangeStartBeforeRangeEnd(requestParam.getRangeStart(), requestParam.getRangeEnd());
         }
 
         List<EventState> eventStates = null;
-        if (states != null) {
-            eventStates = getEventStates(states);
+        if (requestParam.getStates() != null) {
+            eventStates = getEventStates(requestParam.getStates());
         }
 
         List<Specification> conditions = new ArrayList<>();
 
-        if (users != null) {
-            conditions.add(EventSpecification.findByInitiatorIdIn(users));
+        if (requestParam.getUsers() != null) {
+            conditions.add(EventSpecification.findByInitiatorIdIn(requestParam.getUsers()));
         }
 
         if (eventStates != null) {
             conditions.add(EventSpecification.findByStatesIn(eventStates));
         }
 
-        if (categories != null) {
-            conditions.add(EventSpecification.findByCategoryIdIn(categories));
+        if (requestParam.getCategories() != null) {
+            conditions.add(EventSpecification.findByCategoryIdIn(requestParam.getCategories()));
         }
 
-        if (rangeStart != null) {
-            conditions.add(EventSpecification.findByRangeStartGreaterThanEqual(rangeStart));
+        if (requestParam.getRangeStart() != null) {
+            conditions.add(EventSpecification.findByRangeStartGreaterThanEqual(requestParam.getRangeStart()));
         }
-        if (rangeEnd != null) {
-            conditions.add(EventSpecification.findByRangeEndLessThanEqual(rangeEnd));
+        if (requestParam.getRangeEnd() != null) {
+            conditions.add(EventSpecification.findByRangeEndLessThanEqual(requestParam.getRangeEnd()));
         }
 
         List<Event> events = getEventsByCondition(conditions, page);
@@ -263,39 +261,36 @@ public class EventServiceImpl implements  EventService {
     }
 
     @Override
-    public List<EventShortDto> getPublicEvents(
-            String text, List<Long> categories, Boolean paid, Boolean onlyAvailable,
-            LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable page
-    ) {
-        if (rangeStart != null && rangeEnd != null) {
-            checkRangeStartBeforeRangeEnd(rangeStart, rangeEnd);
+    public List<EventShortDto> getPublicEvents(EventRequestParam requestParam, Pageable page) {
+        if (requestParam.getRangeStart() != null && requestParam.getRangeEnd() != null) {
+            checkRangeStartBeforeRangeEnd(requestParam.getRangeStart(), requestParam.getRangeEnd());
         }
 
         List<Specification> conditions = new ArrayList<>();
 
         conditions.add(EventSpecification.isPublished());
 
-        if (text != null) {
-            conditions.add(EventSpecification.findByTextContaining(text));
+        if (requestParam.getText() != null) {
+            conditions.add(EventSpecification.findByTextContaining(requestParam.getText()));
         }
 
-        if (categories != null) {
-            conditions.add(EventSpecification.findByCategoryIdIn(categories));
+        if (requestParam.getCategories() != null) {
+            conditions.add(EventSpecification.findByCategoryIdIn(requestParam.getCategories()));
         }
 
-        if (paid != null) {
-            conditions.add(EventSpecification.findByPaid(paid));
+        if (requestParam.getPaid() != null) {
+            conditions.add(EventSpecification.findByPaid(requestParam.getPaid()));
         }
 
-        if (onlyAvailable != null && Boolean.TRUE.equals(onlyAvailable)) {
+        if (requestParam.getOnlyAvailable() != null && Boolean.TRUE.equals(requestParam.getOnlyAvailable())) {
             conditions.add(EventSpecification.findByOnlyAvailable());
         }
 
-        if (rangeStart != null) {
-            conditions.add(EventSpecification.findByRangeStartGreaterThanEqual(rangeStart));
+        if (requestParam.getRangeStart() != null) {
+            conditions.add(EventSpecification.findByRangeStartGreaterThanEqual(requestParam.getRangeStart()));
         }
-        if (rangeEnd != null) {
-            conditions.add(EventSpecification.findByRangeEndLessThanEqual(rangeEnd));
+        if (requestParam.getRangeEnd() != null) {
+            conditions.add(EventSpecification.findByRangeEndLessThanEqual(requestParam.getRangeEnd()));
         }
 
         List<Event> events = getEventsByCondition(conditions, page);

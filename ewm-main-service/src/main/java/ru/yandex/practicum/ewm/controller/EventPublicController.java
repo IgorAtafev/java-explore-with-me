@@ -16,6 +16,7 @@ import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.model.EventSortType;
 import ru.yandex.practicum.ewm.service.EventService;
+import ru.yandex.practicum.ewm.util.EventRequestParam;
 import ru.yandex.practicum.ewm.validator.ValidationException;
 
 import javax.validation.constraints.Positive;
@@ -48,8 +49,16 @@ public class EventPublicController {
         EventSortType sortType = getSortType(sort);
         Pageable page = PageRequest.of(from / size, size, Sort.by("eventDate").ascending());
 
-        List<EventShortDto> events = eventService.getPublicEvents(text, categories, paid, onlyAvailable,
-                rangeStart, rangeEnd, page);
+        EventRequestParam requestParam = EventRequestParam.builder()
+                .text(text)
+                .categories(categories)
+                .paid(paid)
+                .onlyAvailable(onlyAvailable)
+                .rangeStart(rangeStart)
+                .rangeEnd(rangeEnd)
+                .build();
+
+        List<EventShortDto> events = eventService.getPublicEvents(requestParam, page);
         return events;
     }
 

@@ -7,8 +7,8 @@ import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateResult;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.dto.ParticipationRequestDto;
+import ru.yandex.practicum.ewm.util.EventRequestParam;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventService {
@@ -83,16 +83,11 @@ public interface EventService {
      * Returns a list of events by the admin
      * Results should be returned page by page
      *
-     * @param users
-     * @param states
-     * @param categories
-     * @param rangeStart
-     * @param rangeEnd
+     * @param requestParam
      * @param page
      * @return list of events
      */
-    List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states, List<Long> categories,
-                                        LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable page);
+    List<EventFullDto> getEventsByAdmin(EventRequestParam requestParam, Pageable page);
 
     /**
      * Updates the status of event requests
@@ -127,17 +122,11 @@ public interface EventService {
      * Returns a list of public events
      * Results should be returned page by page
      *
-     * @param text
-     * @param categories
-     * @param paid
-     * @param onlyAvailable
-     * @param rangeStart
-     * @param rangeEnd
+     * @param requestParam
      * @param page
      * @return list of events
      */
-    List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid, Boolean onlyAvailable,
-                                        LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable page);
+    List<EventShortDto> getPublicEvents(EventRequestParam requestParam, Pageable page);
 
     /**
      * Returns a public event by id

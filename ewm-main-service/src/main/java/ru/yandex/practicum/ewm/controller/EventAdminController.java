@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.EventForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.service.EventService;
+import ru.yandex.practicum.ewm.util.EventRequestParam;
 import ru.yandex.practicum.ewm.validator.ValidationOnUpdate;
 
 import javax.validation.constraints.Positive;
@@ -55,6 +56,14 @@ public class EventAdminController {
     ) {
         Pageable page = PageRequest.of(from / size, size, Sort.by("eventDate").ascending());
 
-        return eventService.getEventsByAdmin(users, states, categories, rangeStart, rangeEnd, page);
+        EventRequestParam requestParam = EventRequestParam.builder()
+                .users(users)
+                .states(states)
+                .categories(categories)
+                .rangeStart(rangeStart)
+                .rangeEnd(rangeEnd)
+                .build();
+
+        return eventService.getEventsByAdmin(requestParam, page);
     }
 }
