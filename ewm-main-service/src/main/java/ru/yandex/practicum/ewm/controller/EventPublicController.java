@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
-import ru.yandex.practicum.ewm.model.EventSortType;
 import ru.yandex.practicum.ewm.service.EventService;
+import ru.yandex.practicum.ewm.service.StatsService;
 import ru.yandex.practicum.ewm.util.EventRequestParam;
-import ru.yandex.practicum.ewm.validator.ValidationException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
@@ -33,6 +33,7 @@ public class EventPublicController {
 
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private final EventService eventService;
+    private final StatsService statsService;
 
     @GetMapping
     public List<EventShortDto> getEvents(
@@ -44,9 +45,9 @@ public class EventPublicController {
             @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "EVENT_DATE") String sort,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(defaultValue = "10") @Positive Integer size
+            @RequestParam(defaultValue = "10") @Positive Integer size,
+            HttpServletRequest request
     ) {
-        EventSortType sortType = getSortType(sort);
         Pageable page = PageRequest.of(from / size, size, Sort.by("eventDate").ascending());
 
         EventRequestParam requestParam = EventRequestParam.builder()
@@ -56,22 +57,14 @@ public class EventPublicController {
                 .onlyAvailable(onlyAvailable)
                 .rangeStart(rangeStart)
                 .rangeEnd(rangeEnd)
+                .sort(sort)
                 .build();
 
-        List<EventShortDto> events = eventService.getPublicEvents(requestParam, page);
-        return events;
+        return eventService.getPublicEvents(requestParam, request, page);
     }
 
     @GetMapping("/{id}")
-    public EventFullDto getEventById(@PathVariable Long id) {
-        return eventService.getPublicEventById(id);
-    }
-
-    private EventSortType getSortType(String sort) {
-        try {
-            return EventSortType.valueOf(sort.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Unknown sort type: UNSUPPORTED_STATUS");
-        }
+    public EventFullDto getEventById(@PathVariable Long id, HttpServletRequest request) {
+        return eventService.getPublicEventById(id, request);
     }
 }

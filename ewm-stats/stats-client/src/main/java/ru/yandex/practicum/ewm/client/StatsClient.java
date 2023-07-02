@@ -14,8 +14,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.yandex.practicum.ewm.dto.EndpointHitDto;
+import ru.yandex.practicum.ewm.util.StatsRequestParam;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -38,21 +38,21 @@ public class StatsClient {
         return makeAndSendRequest(HttpMethod.POST, "/hit", null, endpointHitDto);
     }
 
-    public ResponseEntity<Object> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+    public ResponseEntity<Object> getStats(StatsRequestParam requestParam) {
         Map<String, Object> parameters = new HashMap<>();
         StringBuilder path = new StringBuilder()
                 .append("/stats?start={start}&end={end}");
 
-        parameters.put("start", start.format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
-        parameters.put("end", end.format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+        parameters.put("start", requestParam.getStart().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+        parameters.put("end", requestParam.getEnd().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
 
-        if (uris != null && !uris.isEmpty()) {
+        if (requestParam.getUris() != null && !requestParam.getUris().isEmpty()) {
             path.append("&uris={uris}");
-            parameters.put("uris", String.join(",", uris));
+            parameters.put("uris", String.join(",", requestParam.getUris()));
         }
 
         path.append("&unique={unique}");
-        parameters.put("unique", unique);
+        parameters.put("unique", requestParam.getUnique());
 
         return makeAndSendRequest(HttpMethod.GET, path.toString(), parameters, null);
     }

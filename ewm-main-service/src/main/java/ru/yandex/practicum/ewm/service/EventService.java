@@ -9,6 +9,7 @@ import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.dto.ParticipationRequestDto;
 import ru.yandex.practicum.ewm.util.EventRequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface EventService {
@@ -123,17 +124,19 @@ public interface EventService {
      * Results should be returned page by page
      *
      * @param requestParam
+     * @param request
      * @param page
      * @return list of events
      */
-    List<EventShortDto> getPublicEvents(EventRequestParam requestParam, Pageable page);
+    List<EventShortDto> getPublicEvents(EventRequestParam requestParam, HttpServletRequest request, Pageable page);
 
     /**
      * Returns a public event by id
      * If the event is not found throws NotFoundException
      *
      * @param id
+     * @param request
      * @return event
      */
-    EventFullDto getPublicEventById(Long id);
+    EventFullDto getPublicEventById(Long id, HttpServletRequest request);
 }

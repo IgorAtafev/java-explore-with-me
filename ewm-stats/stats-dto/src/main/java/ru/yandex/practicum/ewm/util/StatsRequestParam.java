@@ -14,23 +14,13 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class EventRequestParam {
+public class StatsRequestParam {
 
-    List<Long> users;
+    LocalDateTime start;
 
-    List<String> states;
+    LocalDateTime end;
 
-    String text;
+    List<String> uris;
 
-    List<Long> categories;
-
-    Boolean paid;
-
-    Boolean onlyAvailable;
-
-    LocalDateTime rangeStart;
-
-    LocalDateTime rangeEnd;
-
-    String sort;
+    Boolean unique;
 }

@@ -10,6 +10,7 @@ import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.mapper.StatsMapper;
 import ru.yandex.practicum.ewm.model.EndpointHit;
 import ru.yandex.practicum.ewm.repository.StatsRepository;
+import ru.yandex.practicum.ewm.util.StatsRequestParam;
 import ru.yandex.practicum.ewm.validator.ValidationException;
 
 import java.time.LocalDateTime;
@@ -40,8 +41,15 @@ class StatsServiceImplTest {
         LocalDateTime start = LocalDateTime.of(2023, 5, 1, 0, 2, 0);
         LocalDateTime end = LocalDateTime.of(2023, 5, 1, 0, 0, 0);
 
+        StatsRequestParam requestParam = StatsRequestParam.builder()
+                .start(start)
+                .end(end)
+                .uris(List.of())
+                .unique(false)
+                .build();
+
         assertThatExceptionOfType(ValidationException.class)
-                .isThrownBy(() -> statsService.getStats(start, end, List.of(), false));
+                .isThrownBy(() -> statsService.getStats(requestParam));
 
         verifyNoInteractions(statsRepository, statsMapper);
     }

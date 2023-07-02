@@ -35,6 +35,7 @@ public class EventMapper {
         eventDto.setPublishedOn(event.getPublishedOn());
         eventDto.setState(event.getState());
         eventDto.setConfirmedRequests(event.getConfirmedRequests());
+        eventDto.setViews(event.getViews());
         eventDto.setCreatedOn(event.getCreated());
 
         return eventDto;

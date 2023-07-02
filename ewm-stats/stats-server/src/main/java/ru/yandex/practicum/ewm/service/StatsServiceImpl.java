@@ -10,6 +10,7 @@ import ru.yandex.practicum.ewm.dto.EndpointHitDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.mapper.StatsMapper;
 import ru.yandex.practicum.ewm.repository.StatsRepository;
+import ru.yandex.practicum.ewm.util.StatsRequestParam;
 import ru.yandex.practicum.ewm.validator.ValidationException;
 
 import javax.persistence.EntityManager;
@@ -39,15 +40,14 @@ public class StatsServiceImpl implements StatsService {
         return statsMapper.toDto(statsRepository.save(statsMapper.toEndpointHit(endpointHitDto)));
     }
 
-    @Transactional(readOnly = true)
     @Override
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        if (start.isAfter(end)) {
+    public List<ViewStatsDto> getStats(StatsRequestParam requestParam) {
+        if (requestParam.getStart().isAfter(requestParam.getEnd())) {
             throw new ValidationException(String.format("The start of the range must be before the end of the range"));
         }
 
         NumberExpression<Long> count = endpointHit.ip.count();
-        if (Objects.equals(Boolean.TRUE, unique)) {
+        if (Objects.equals(Boolean.TRUE, requestParam.getUnique())) {
             count = endpointHit.ip.countDistinct();
         }
 
@@ -58,7 +58,7 @@ public class StatsServiceImpl implements StatsService {
                         endpointHit.uri,
                         count))
                 .from(endpointHit)
-                .where(getCondition(start, end, uris))
+                .where(getCondition(requestParam.getStart(), requestParam.getEnd(), requestParam.getUris()))
                 .groupBy(endpointHit.app, endpointHit.uri)
                 .orderBy(count.desc())
                 .fetch();

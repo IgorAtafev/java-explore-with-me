@@ -71,6 +71,9 @@ public class Event {
     @Transient
     private Integer confirmedRequests = 0;
 
+    @Transient
+    private Long views;
+
     @Column
     private LocalDateTime created;
 }

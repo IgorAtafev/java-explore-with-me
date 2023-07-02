@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.yandex.practicum.ewm.dto.EndpointHitDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.service.StatsService;
+import ru.yandex.practicum.ewm.util.StatsRequestParam;
 import ru.yandex.practicum.ewm.validator.ErrorHandler;
 
 import java.time.LocalDateTime;
@@ -71,7 +72,14 @@ class StatsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
 
-        verify(statsService, times(1)).getStats(start, end, uris, unique);
+        StatsRequestParam requestParam = StatsRequestParam.builder()
+                .start(start)
+                .end(end)
+                .uris(uris)
+                .unique(unique)
+                .build();
+
+        verify(statsService, times(1)).getStats(requestParam);
         verifyNoMoreInteractions(statsService);
     }
 
@@ -89,7 +97,14 @@ class StatsControllerTest {
 
         String json = objectMapper.writeValueAsString(expected);
 
-        when(statsService.getStats(start, end, uris, unique)).thenReturn(expected);
+        StatsRequestParam requestParam = StatsRequestParam.builder()
+                .start(start)
+                .end(end)
+                .uris(uris)
+                .unique(unique)
+                .build();
+
+        when(statsService.getStats(requestParam)).thenReturn(expected);
 
         mockMvc.perform(get("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
                         start.format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)),
@@ -99,7 +114,7 @@ class StatsControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(json));
 
-        verify(statsService, times(1)).getStats(start, end, uris, unique);
+        verify(statsService, times(1)).getStats(requestParam);
         verifyNoMoreInteractions(statsService);
     }
 
@@ -140,7 +155,7 @@ class StatsControllerTest {
                 Arguments.of(initEndpointHitDto(dto -> dto.setUri("   "))),
                 Arguments.of(initEndpointHitDto(dto -> dto.setUri("/even".repeat(51) + "t"))),
                 Arguments.of(initEndpointHitDto(dto -> dto.setIp(null))),
-                Arguments.of(initEndpointHitDto(dto -> dto.setIp("incorrect"))),
+                Arguments.of(initEndpointHitDto(dto -> dto.setIp("   "))),
                 Arguments.of(initEndpointHitDto(dto -> dto.setTimestamp(null)))
         );
     }

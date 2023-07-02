@@ -36,6 +36,7 @@ services:
         - ./ewm-main-service/target/ewm-main-service-0.0.1-SNAPSHOT.jar:/main-service-app.jar
     entrypoint: ["java","-jar","/main-service-app.jar"]
     environment:
+        - EWM_STATS_SERVER_URL=http://stats-server:9090
         - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm_main
         - SPRING_DATASOURCE_USERNAME=ewm
         - SPRING_DATASOURCE_PASSWORD=ewm

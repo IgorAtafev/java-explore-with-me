@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.EndpointHitDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.service.StatsService;
+import ru.yandex.practicum.ewm.util.StatsRequestParam;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -42,6 +43,13 @@ public class StatsController {
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") Boolean unique
     ) {
-        return statsService.getStats(start, end, uris, unique);
+        StatsRequestParam requestParam = StatsRequestParam.builder()
+                .start(start)
+                .end(end)
+                .uris(uris)
+                .unique(unique)
+                .build();
+
+        return statsService.getStats(requestParam);
     }
 }

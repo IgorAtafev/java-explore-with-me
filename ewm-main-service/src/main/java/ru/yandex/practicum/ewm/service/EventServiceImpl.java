@@ -5,16 +5,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventForRequestDto;
+import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateResult;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.dto.ParticipationRequestDto;
+import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.mapper.EventMapper;
 import ru.yandex.practicum.ewm.mapper.ParticipationRequestMapper;
 import ru.yandex.practicum.ewm.model.Category;
 import ru.yandex.practicum.ewm.model.Event;
+import ru.yandex.practicum.ewm.model.EventSortType;
 import ru.yandex.practicum.ewm.model.EventState;
 import ru.yandex.practicum.ewm.model.EventStateAction;
 import ru.yandex.practicum.ewm.model.ParticipationRequest;
@@ -26,12 +28,15 @@ import ru.yandex.practicum.ewm.repository.ParticipationRequestRepository;
 import ru.yandex.practicum.ewm.repository.UserRepository;
 import ru.yandex.practicum.ewm.specification.EventSpecification;
 import ru.yandex.practicum.ewm.util.EventRequestParam;
+import ru.yandex.practicum.ewm.util.StatsRequestParam;
 import ru.yandex.practicum.ewm.validator.ConflictException;
 import ru.yandex.practicum.ewm.validator.NotFoundException;
 import ru.yandex.practicum.ewm.validator.ValidationException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,6 +52,7 @@ public class EventServiceImpl implements  EventService {
     private final ParticipationRequestRepository requestRepository;
     private final EventMapper eventMapper;
     private final ParticipationRequestMapper requestMapper;
+    private final StatsService statsService;
 
     @Transactional
     @Override
@@ -261,10 +267,14 @@ public class EventServiceImpl implements  EventService {
     }
 
     @Override
-    public List<EventShortDto> getPublicEvents(EventRequestParam requestParam, Pageable page) {
+    public List<EventShortDto> getPublicEvents(
+            EventRequestParam requestParam, HttpServletRequest request, Pageable page
+    ) {
         if (requestParam.getRangeStart() != null && requestParam.getRangeEnd() != null) {
             checkRangeStartBeforeRangeEnd(requestParam.getRangeStart(), requestParam.getRangeEnd());
         }
+
+        EventSortType sortType = getSortType(requestParam.getSort());
 
         List<Specification> conditions = new ArrayList<>();
 
@@ -295,17 +305,29 @@ public class EventServiceImpl implements  EventService {
 
         List<Event> events = getEventsByCondition(conditions, page);
 
+        statsService.saveEndpointHit(request);
+        setViewForEvents(events, request);
+
+        if (EventSortType.VIEWS.getType().equals(requestParam.getSort())) {
+            events.stream()
+                    .sorted(Comparator.comparing(Event::getViews))
+                    .collect(Collectors.toList());
+        }
+
         return eventMapper.toShortDtos(events);
     }
 
     @Override
-    public EventFullDto getPublicEventById(Long id) {
+    public EventFullDto getPublicEventById(Long id, HttpServletRequest request) {
         Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(
                 () -> new NotFoundException(String.format(
                         "Public event with id %d does not exist", id)));
 
         event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
                 id, ParticipationRequestStatus.CONFIRMED));
+
+        statsService.saveEndpointHit(request);
+        event.setViews(getViewForEvent(event.getPublishedOn(), request));
 
         return eventMapper.toFullDto(event);
     }
@@ -480,5 +502,66 @@ public class EventServiceImpl implements  EventService {
         setConfirmedRequestsForEvents(events);
 
         return events;
+    }
+
+    private EventSortType getSortType(String sort) {
+        try {
+            return EventSortType.valueOf(sort.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Unknown sort type: UNSUPPORTED_STATUS");
+        }
+    }
+
+    private Long getViewForEvent(LocalDateTime start, HttpServletRequest request) {
+        StatsRequestParam requestParam = StatsRequestParam.builder()
+                .start(start)
+                .end(LocalDateTime.now())
+                .uris(List.of(request.getRequestURI()))
+                .unique(true)
+                .build();
+
+        List<ViewStatsDto> stats = statsService.getStats(requestParam);
+
+        if (stats.isEmpty()) {
+            return 0L;
+        }
+
+        return stats.get(0).getHits();
+    }
+
+    private void setViewForEvents(List<Event> events, HttpServletRequest request) {
+        List<String> uris = new ArrayList<>();
+
+        LocalDateTime minPublishedOn = events.get(0).getPublishedOn();
+        for (Event event : events) {
+            uris.add(request.getRequestURI() + event.getId());
+
+            if (minPublishedOn.isAfter(event.getPublishedOn())) {
+                minPublishedOn = event.getPublishedOn();
+            }
+        }
+
+        StatsRequestParam requestParam = StatsRequestParam.builder()
+                .start(minPublishedOn)
+                .end(LocalDateTime.now())
+                .uris(uris)
+                .unique(true)
+                .build();
+
+        Map<String, List<ViewStatsDto>> stats = statsService.getStats(requestParam).stream()
+                .collect(Collectors.groupingBy(endPoint -> endPoint.getUri()));
+
+        if (stats.isEmpty()) {
+            return;
+        }
+
+        for (Event event : events) {
+            List<ViewStatsDto> hits = stats.get(request.getRequestURI() + event.getId());
+            if (hits == null) {
+                continue;
+            }
+
+            event.setViews(hits.get(0).getHits());
+        }
     }
 }
