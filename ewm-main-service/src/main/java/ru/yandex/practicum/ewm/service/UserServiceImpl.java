@@ -14,25 +14,23 @@ import ru.yandex.practicum.ewm.validator.NotFoundException;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
-    @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
-        User user = userMapper.toUser(userDto);
+        User user = UserMapper.toUser(userDto);
 
         if (userRepository.existsByEmailIgnoreCase(user.getEmail())) {
             throw new ConflictException(String.format("User with email %s exists", user.getEmail()));
         }
 
-        return userMapper.toDto(userRepository.save(user));
+        return UserMapper.toDto(userRepository.save(user));
     }
 
-    @Transactional
     @Override
     public void removeUser(Long id) {
         if (!userRepository.existsById(id)) {
@@ -42,6 +40,7 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<UserDto> getUsers(List<Long> ids, Pageable page) {
         List<User> users;
@@ -52,6 +51,6 @@ public class UserServiceImpl implements UserService {
             users = userRepository.findByIdIn(ids, page);
         }
 
-        return userMapper.toDtos(users);
+        return UserMapper.toDtos(users);
     }
 }

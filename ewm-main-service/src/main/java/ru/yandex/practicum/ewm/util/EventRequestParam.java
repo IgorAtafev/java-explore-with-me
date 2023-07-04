@@ -16,17 +16,17 @@ import java.util.List;
 @ToString
 public class EventRequestParam {
 
-    List<Long> users;
+    private List<Long> users;
 
-    List<String> states;
+    private List<String> states;
 
-    String text;
+    private String text;
 
-    List<Long> categories;
+    private List<Long> categories;
 
-    Boolean paid;
+    private Boolean paid;
 
-    Boolean onlyAvailable;
+    private Boolean onlyAvailable;
 
     LocalDateTime rangeStart;
 

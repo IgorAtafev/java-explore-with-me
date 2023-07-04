@@ -20,6 +20,8 @@ import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
+import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
+
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -64,7 +66,7 @@ public class EventForRequestDto {
             groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
             message = "Event date must be in the future"
     )
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
 
     @NotNull(groups = ValidationOnCreate.class, message = "Location date cannot be null")

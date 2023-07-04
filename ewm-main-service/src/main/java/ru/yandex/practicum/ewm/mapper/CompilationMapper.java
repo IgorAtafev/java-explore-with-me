@@ -1,7 +1,6 @@
 package ru.yandex.practicum.ewm.mapper;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.ewm.dto.CompilationDto;
 import ru.yandex.practicum.ewm.dto.CompilationForRequestDto;
 import ru.yandex.practicum.ewm.model.Compilation;
@@ -10,11 +9,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
+@UtilityClass
 public class CompilationMapper {
-
-    private final EventMapper eventMapper;
 
     public CompilationDto toDto(Compilation compilation) {
         CompilationDto compilationDto = new CompilationDto();
@@ -22,14 +18,14 @@ public class CompilationMapper {
         compilationDto.setId(compilation.getId());
         compilationDto.setTitle(compilation.getTitle());
         compilationDto.setPinned(compilation.getPinned());
-        compilationDto.setEvents(eventMapper.toShortDtos(compilation.getEvents()));
+        compilationDto.setEvents(EventMapper.toShortDtos(compilation.getEvents()));
 
         return compilationDto;
     }
 
     public List<CompilationDto> toDtos(Collection<Compilation> compilations) {
         return compilations.stream()
-                .map(this::toDto)
+                .map(CompilationMapper::toDto)
                 .collect(Collectors.toList());
     }
 

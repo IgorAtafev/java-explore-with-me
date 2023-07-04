@@ -15,28 +15,27 @@ import ru.yandex.practicum.ewm.validator.NotFoundException;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
-    private final CategoryMapper categoryMapper;
 
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
-        Category category = categoryMapper.toCategory(categoryDto);
+        Category category = CategoryMapper.toCategory(categoryDto);
 
         if (categoryRepository.existsByNameIgnoreCase(category.getName())) {
             throw new ConflictException(String.format("Category with name %s exists", category.getName()));
         }
 
-        return categoryMapper.toDto(categoryRepository.save(category));
+        return CategoryMapper.toDto(categoryRepository.save(category));
     }
 
-    @Transactional
     @Override
     public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
-        Category category = categoryMapper.toCategory(categoryDto);
+        Category category = CategoryMapper.toCategory(categoryDto);
 
         if (!categoryRepository.existsById(id)) {
             throw new NotFoundException(String.format("Category with id %d does not exist", id));
@@ -48,10 +47,9 @@ public class CategoryServiceImpl implements CategoryService {
 
         category.setId(id);
 
-        return categoryMapper.toDto(categoryRepository.save(category));
+        return CategoryMapper.toDto(categoryRepository.save(category));
     }
 
-    @Transactional
     @Override
     public void removeCategory(Long id) {
         if (!categoryRepository.existsById(id)) {
@@ -65,16 +63,18 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<CategoryDto> getCategories(Pageable page) {
-        return categoryMapper.toDtos(categoryRepository.findAll(page).toList());
+        return CategoryMapper.toDtos(categoryRepository.findAll(page).toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CategoryDto getCategoryById(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Category with id %d does not exist", id)));
 
-        return categoryMapper.toDto(category);
+        return CategoryMapper.toDto(category);
     }
 }

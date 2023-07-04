@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EventServiceImpl implements  EventService {
 
@@ -50,11 +51,8 @@ public class EventServiceImpl implements  EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ParticipationRequestRepository requestRepository;
-    private final EventMapper eventMapper;
-    private final ParticipationRequestMapper requestMapper;
     private final StatsService statsService;
 
-    @Transactional
     @Override
     public EventFullDto createEvent(Long userId, EventForRequestDto eventDto) {
         EventState state = EventState.PENDING;
@@ -73,10 +71,9 @@ public class EventServiceImpl implements  EventService {
 
         checkEventDateByCurrentDate(event.getEventDate());
 
-        return eventMapper.toFullDto(eventRepository.save(event));
+        return EventMapper.toFullDto(eventRepository.save(event));
     }
 
-    @Transactional
     @Override
     public EventFullDto updateUserEvent(Long userId, Long id, EventForRequestDto eventDto) {
         eventDto.setId(id);
@@ -97,10 +94,9 @@ public class EventServiceImpl implements  EventService {
 
         checkEventDateByCurrentDate(event.getEventDate());
 
-        return eventMapper.toFullDto(eventRepository.save(event));
+        return EventMapper.toFullDto(eventRepository.save(event));
     }
 
-    @Transactional
     @Override
     public EventFullDto updateEventByAdmin(Long id, EventForRequestDto eventDto) {
         eventDto.setId(id);
@@ -120,9 +116,10 @@ public class EventServiceImpl implements  EventService {
             checkEventDateByPublishDate(event.getEventDate(), event.getPublishedOn());
         }
 
-        return eventMapper.toFullDto(eventRepository.save(event));
+        return EventMapper.toFullDto(eventRepository.save(event));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> getUserEvents(Long userId, Pageable page) {
         if (!userRepository.existsById(userId)) {
@@ -132,9 +129,10 @@ public class EventServiceImpl implements  EventService {
         List<Event> events = eventRepository.findByInitiatorId(userId, page);
         setConfirmedRequestsForEvents(events);
 
-        return eventMapper.toShortDtos(events);
+        return EventMapper.toShortDtos(events);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventFullDto getUserEventById(Long userId, Long id) {
         if (!userRepository.existsById(userId)) {
@@ -148,9 +146,10 @@ public class EventServiceImpl implements  EventService {
         event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
                 id, ParticipationRequestStatus.CONFIRMED));
 
-        return eventMapper.toFullDto(event);
+        return EventMapper.toFullDto(event);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventFullDto> getEventsByAdmin(EventRequestParam requestParam, Pageable page) {
         if (requestParam.getRangeStart() != null && requestParam.getRangeEnd() != null) {
@@ -185,10 +184,9 @@ public class EventServiceImpl implements  EventService {
 
         List<Event> events = getEventsByCondition(conditions, page);
 
-        return eventMapper.toFullDtos(events);
+        return EventMapper.toFullDtos(events);
     }
 
-    @Transactional
     @Override
     public EventRequestStatusUpdateResult updateRequestsStatus(
             Long userId, Long id, EventRequestStatusUpdateRequest requestsDto
@@ -238,7 +236,7 @@ public class EventServiceImpl implements  EventService {
 
             request.setStatus(currentStatus);
 
-            ParticipationRequestDto requestDto = requestMapper.toDto(request);
+            ParticipationRequestDto requestDto = ParticipationRequestMapper.toDto(request);
 
             if (ParticipationRequestStatus.CONFIRMED.equals(currentStatus)) {
                 confirmedRequests.add(requestDto);
@@ -252,6 +250,7 @@ public class EventServiceImpl implements  EventService {
         return new EventRequestStatusUpdateResult(confirmedRequests, rejectedRequests);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ParticipationRequestDto> getRequests(Long userId, Long id) {
         if (!userRepository.existsById(userId)) {
@@ -263,9 +262,10 @@ public class EventServiceImpl implements  EventService {
                     "Event with id %d and initiator id %d does not exist", id, userId));
         }
 
-        return requestMapper.toDtos(requestRepository.findByEventId(id));
+        return ParticipationRequestMapper.toDtos(requestRepository.findByEventId(id));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> getPublicEvents(
             EventRequestParam requestParam, HttpServletRequest request, Pageable page
@@ -314,9 +314,10 @@ public class EventServiceImpl implements  EventService {
                     .collect(Collectors.toList());
         }
 
-        return eventMapper.toShortDtos(events);
+        return EventMapper.toShortDtos(events);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventFullDto getPublicEventById(Long id, HttpServletRequest request) {
         Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(
@@ -329,7 +330,7 @@ public class EventServiceImpl implements  EventService {
         statsService.saveEndpointHit(request);
         event.setViews(getViewForEvent(event.getPublishedOn(), request));
 
-        return eventMapper.toFullDto(event);
+        return EventMapper.toFullDto(event);
     }
 
     private Event toEvent(Long userId, EventForRequestDto eventDto, EventState state, Event oldEvent) {
@@ -346,7 +347,7 @@ public class EventServiceImpl implements  EventService {
 
         LocalDateTime created = LocalDateTime.now();
 
-        Event event = eventMapper.toEvent(eventDto);
+        Event event = EventMapper.toEvent(eventDto);
 
         if (eventDto.getId() != null) {
             if (eventDto.getTitle() == null) {

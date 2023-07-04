@@ -2,9 +2,7 @@ package ru.yandex.practicum.ewm.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,14 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.service.EventService;
-import ru.yandex.practicum.ewm.service.StatsService;
 import ru.yandex.practicum.ewm.util.EventRequestParam;
+import ru.yandex.practicum.ewm.util.Pagination;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 
 @RestController
 @RequestMapping("/events")
@@ -31,9 +31,7 @@ import java.util.List;
 @Validated
 public class EventPublicController {
 
-    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private final EventService eventService;
-    private final StatsService statsService;
 
     @GetMapping
     public List<EventShortDto> getEvents(
@@ -48,8 +46,6 @@ public class EventPublicController {
             @RequestParam(defaultValue = "10") @Positive Integer size,
             HttpServletRequest request
     ) {
-        Pageable page = PageRequest.of(from / size, size, Sort.by("eventDate").ascending());
-
         EventRequestParam requestParam = EventRequestParam.builder()
                 .text(text)
                 .categories(categories)
@@ -60,11 +56,17 @@ public class EventPublicController {
                 .sort(sort)
                 .build();
 
+        Pageable page = new Pagination(from, size, "eventDate");
+
+        log.info("Request received GET /events?text={}&categories={}&paid={}&onlyAvailable={}&rangeStart={}" +
+                "&rangeEnd={}&sort={}&from={}&size={}", text, categories, paid, onlyAvailable, rangeStart,
+                rangeEnd, sort, from, size);
         return eventService.getPublicEvents(requestParam, request, page);
     }
 
     @GetMapping("/{id}")
     public EventFullDto getEventById(@PathVariable Long id, HttpServletRequest request) {
+        log.info("Request received GET /events/{}", id);
         return eventService.getPublicEventById(id, request);
     }
 }

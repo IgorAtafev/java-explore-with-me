@@ -20,15 +20,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
 
     private final ParticipationRequestRepository requestRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
-    private final ParticipationRequestMapper requestMapper;
 
-    @Transactional
     @Override
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         User user = userRepository.findById(userId).orElseThrow(
@@ -69,10 +68,9 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         request.setStatus(status);
         request.setCreated(LocalDateTime.now());
 
-        return requestMapper.toDto(requestRepository.save(request));
+        return ParticipationRequestMapper.toDto(requestRepository.save(request));
     }
 
-    @Transactional
     @Override
     public ParticipationRequestDto cancelRequest(Long userId, Long id) {
         if (!userRepository.existsById(userId)) {
@@ -89,15 +87,16 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         request.setStatus(ParticipationRequestStatus.CANCELED);
 
-        return requestMapper.toDto(requestRepository.save(request));
+        return ParticipationRequestMapper.toDto(requestRepository.save(request));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(String.format("Requester with id %d does not exist", userId));
         }
 
-        return requestMapper.toDtos(requestRepository.findByRequesterId(userId));
+        return ParticipationRequestMapper.toDtos(requestRepository.findByRequesterId(userId));
     }
 }

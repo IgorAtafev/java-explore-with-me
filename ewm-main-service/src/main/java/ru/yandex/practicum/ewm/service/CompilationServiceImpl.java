@@ -17,14 +17,13 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
-    private final CompilationMapper compilationMapper;
 
-    @Transactional
     @Override
     public CompilationDto createCompilation(CompilationForRequestDto compilationForRequestDto) {
         if (compilationForRequestDto.getPinned() == null) {
@@ -33,10 +32,9 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation compilation = toCompilation(compilationForRequestDto, null);
 
-        return compilationMapper.toDto(compilationRepository.save(compilation));
+        return CompilationMapper.toDto(compilationRepository.save(compilation));
     }
 
-    @Transactional
     @Override
     public CompilationDto updateCompilation(Long id, CompilationForRequestDto compilationForRequestDto) {
         compilationForRequestDto.setId(id);
@@ -47,10 +45,9 @@ public class CompilationServiceImpl implements CompilationService {
 
         Compilation compilation = toCompilation(compilationForRequestDto, oldCompilation);
 
-        return compilationMapper.toDto(compilationRepository.save(compilation));
+        return CompilationMapper.toDto(compilationRepository.save(compilation));
     }
 
-    @Transactional
     @Override
     public void removeCompilation(Long id) {
         if (!compilationRepository.existsById(id)) {
@@ -60,15 +57,17 @@ public class CompilationServiceImpl implements CompilationService {
         compilationRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CompilationDto getCompilationById(Long id) {
         Compilation compilation = compilationRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format(
                         "Compilation with id %d does not exist", id)));
 
-        return compilationMapper.toDto(compilation);
+        return CompilationMapper.toDto(compilation);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, Pageable page) {
         List<Compilation> compilations;
@@ -79,11 +78,11 @@ public class CompilationServiceImpl implements CompilationService {
             compilations = compilationRepository.findByPinned(pinned, page);
         }
 
-        return compilationMapper.toDtos(compilations);
+        return CompilationMapper.toDtos(compilations);
     }
 
     private Compilation toCompilation(CompilationForRequestDto compilationForRequestDto, Compilation oldCompilation) {
-        Compilation compilation = compilationMapper.toCompilation(compilationForRequestDto);
+        Compilation compilation = CompilationMapper.toCompilation(compilationForRequestDto);
 
         List<Event> events;
 

@@ -20,13 +20,14 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 @Validated
 public class StatsController {
 
-    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private final StatsService statsService;
 
     @PostMapping("/hit")
@@ -50,6 +51,7 @@ public class StatsController {
                 .unique(unique)
                 .build();
 
+        log.info("Request received GET /stats?start={}&end={}&uris={}&unique={}", start, end, uris, unique);
         return statsService.getStats(requestParam);
     }
 }

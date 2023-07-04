@@ -2,9 +2,7 @@ package ru.yandex.practicum.ewm.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.UserDto;
 import ru.yandex.practicum.ewm.service.UserService;
+import ru.yandex.practicum.ewm.util.Pagination;
 import ru.yandex.practicum.ewm.validator.ValidationOnCreate;
 
 import javax.validation.constraints.Positive;
@@ -53,8 +52,8 @@ public class UserAdminController {
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size
     ) {
-        Pageable page = PageRequest.of(from / size, size, Sort.by("id").ascending());
-
+        Pageable page = new Pagination(from, size, "id");
+        log.info("Request received GET /admin/users?ids={}&from={}&size={}", ids, from, size);
         return userService.getUsers(ids, page);
     }
 }

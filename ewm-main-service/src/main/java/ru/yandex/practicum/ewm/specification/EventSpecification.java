@@ -1,5 +1,6 @@
 package ru.yandex.practicum.ewm.specification;
 
+import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
 import ru.yandex.practicum.ewm.model.Event;
 import ru.yandex.practicum.ewm.model.EventState;
@@ -10,35 +11,33 @@ import javax.persistence.criteria.Subquery;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@UtilityClass
 public class EventSpecification {
 
-    private EventSpecification() {
-    }
-
-    public static Specification<Event> findByInitiatorIdIn(List<Long> users) {
+    public Specification<Event> findByInitiatorIdIn(List<Long> users) {
         return (root, query, cb) -> cb.in(root.<Long>get("initiator").get("id")).value(users);
     }
 
-    public static Specification<Event> findByStatesIn(List<EventState> eventStates) {
+    public Specification<Event> findByStatesIn(List<EventState> eventStates) {
         return (root, query, cb) -> cb.in(root.get("state")).value(eventStates);
     }
 
-    public static Specification<Event> findByCategoryIdIn(List<Long> categories) {
+    public Specification<Event> findByCategoryIdIn(List<Long> categories) {
         return (root, query, cb) -> cb.in(root.<Long>get("category").get("id")).value(categories);
     }
 
-    public static Specification<Event> findByTextContaining(String text) {
+    public Specification<Event> findByTextContaining(String text) {
         return (root, query, cb) -> cb.or(
                 cb.like(cb.upper(root.get("annotation")), "%" + text.toUpperCase() + "%"),
                 cb.like(cb.upper(root.get("description")), "%" + text.toUpperCase() + "%")
         );
     }
 
-    public static Specification<Event> isPublished() {
+    public Specification<Event> isPublished() {
         return (root, query, cb) -> cb.equal(root.get("state"), EventState.PUBLISHED);
     }
 
-    public static Specification<Event> findByPaid(Boolean paid) {
+    public Specification<Event> findByPaid(Boolean paid) {
         if (Boolean.TRUE.equals(paid)) {
             return (root, query, cb) -> cb.isTrue(root.get("paid"));
         }
@@ -46,7 +45,7 @@ public class EventSpecification {
         return (root, query, cb) -> cb.isFalse(root.get("paid"));
     }
 
-    public static Specification<Event> findByOnlyAvailable() {
+    public Specification<Event> findByOnlyAvailable() {
         return (root, query, cb) -> {
             Subquery<Long> subQuery = query.subquery(Long.class);
             Root<ParticipationRequest> subRoot = subQuery.from(ParticipationRequest.class);
@@ -61,11 +60,11 @@ public class EventSpecification {
         };
     }
 
-    public static Specification<Event> findByRangeStartGreaterThanEqual(LocalDateTime rangeStart) {
+    public Specification<Event> findByRangeStartGreaterThanEqual(LocalDateTime rangeStart) {
         return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("eventDate"), rangeStart);
     }
 
-    public static Specification<Event> findByRangeEndLessThanEqual(LocalDateTime rangeEnd) {
+    public Specification<Event> findByRangeEndLessThanEqual(LocalDateTime rangeEnd) {
         return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("eventDate"), rangeEnd);
     }
 }

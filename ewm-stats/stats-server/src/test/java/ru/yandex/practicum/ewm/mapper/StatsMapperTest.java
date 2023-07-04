@@ -10,13 +10,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class StatsMapperTest {
 
-    private final StatsMapper statsMapper = new StatsMapper();
-
     @Test
     void toDto_shouldReturnEndpointHitDto() {
         EndpointHit endpointHit = initEndpointHit();
 
-        EndpointHitDto endpointHitDto = statsMapper.toDto(endpointHit);
+        EndpointHitDto endpointHitDto = StatsMapper.toDto(endpointHit);
 
         assertThat(endpointHitDto.getId()).isEqualTo(1L);
         assertThat(endpointHitDto.getApp()).isEqualTo("ewm-main-service");
@@ -30,7 +28,7 @@ class StatsMapperTest {
     void toEndpointHit_shouldReturnEndpointHit() {
         EndpointHitDto endpointHitDto = initEndpointHitDto();
 
-        EndpointHit endpointHit = statsMapper.toEndpointHit(endpointHitDto);
+        EndpointHit endpointHit = StatsMapper.toEndpointHit(endpointHitDto);
 
         assertThat(endpointHit.getApp()).isEqualTo("ewm-main-service");
         assertThat(endpointHit.getUri()).isEqualTo("/events/1");

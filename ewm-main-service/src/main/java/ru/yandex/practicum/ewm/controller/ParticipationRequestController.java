@@ -39,6 +39,7 @@ public class ParticipationRequestController {
 
     @GetMapping
     public List<ParticipationRequestDto> getRequests(@PathVariable Long userId) {
+        log.info("Request received GET /users/{}/requests", userId);
         return requestService.getUserRequests(userId);
     }
 }

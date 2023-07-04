@@ -1,12 +1,10 @@
 package ru.yandex.practicum.ewm.mapper;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.ewm.dto.EndpointHitDto;
 import ru.yandex.practicum.ewm.model.EndpointHit;
 
-@Component
-@RequiredArgsConstructor
+@UtilityClass
 public class StatsMapper {
 
     public EndpointHitDto toDto(EndpointHit endpointHit) {

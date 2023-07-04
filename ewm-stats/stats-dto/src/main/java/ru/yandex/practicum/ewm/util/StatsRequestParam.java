@@ -16,11 +16,11 @@ import java.util.List;
 @ToString
 public class StatsRequestParam {
 
-    LocalDateTime start;
+    private LocalDateTime start;
 
-    LocalDateTime end;
+    private LocalDateTime end;
 
-    List<String> uris;
+    private List<String> uris;
 
-    Boolean unique;
+    private Boolean unique;
 }

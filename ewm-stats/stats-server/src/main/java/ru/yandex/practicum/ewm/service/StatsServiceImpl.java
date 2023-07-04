@@ -22,24 +22,23 @@ import java.util.Objects;
 import static ru.yandex.practicum.ewm.model.QEndpointHit.endpointHit;
 
 @Service
+@Transactional
 public class StatsServiceImpl implements StatsService {
 
     private final StatsRepository statsRepository;
     private final JPAQueryFactory queryFactory;
-    private final StatsMapper statsMapper;
 
-    public StatsServiceImpl(StatsRepository statsRepository, EntityManager entityManager, StatsMapper statsMapper) {
+    public StatsServiceImpl(StatsRepository statsRepository, EntityManager entityManager) {
         this.statsRepository = statsRepository;
         this.queryFactory = new JPAQueryFactory(entityManager);
-        this.statsMapper = statsMapper;
     }
 
-    @Transactional
     @Override
     public EndpointHitDto saveEndpointHit(EndpointHitDto endpointHitDto) {
-        return statsMapper.toDto(statsRepository.save(statsMapper.toEndpointHit(endpointHitDto)));
+        return StatsMapper.toDto(statsRepository.save(StatsMapper.toEndpointHit(endpointHitDto)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ViewStatsDto> getStats(StatsRequestParam requestParam) {
         if (requestParam.getStart().isAfter(requestParam.getEnd())) {

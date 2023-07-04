@@ -9,6 +9,8 @@ import ru.yandex.practicum.ewm.model.ParticipationRequestStatus;
 
 import java.time.LocalDateTime;
 
+import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
+
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -23,6 +25,6 @@ public class ParticipationRequestDto {
 
     private ParticipationRequestStatus status;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime created;
 }

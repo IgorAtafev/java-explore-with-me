@@ -1,6 +1,7 @@
 package ru.yandex.practicum.ewm.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,44 +11,30 @@ import ru.yandex.practicum.ewm.model.Location;
 
 import java.time.LocalDateTime;
 
+import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
+
 @Getter
 @Setter
 @EqualsAndHashCode
 @ToString
 public class EventFullDto {
 
-    private Long id;
-
-    private String title;
-
-    private String annotation;
+    @JsonUnwrapped
+    private EventShortDto shortDto;
 
     private String description;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime eventDate;
-
     private Location location;
-
-    private CategoryDto category;
-
-    private UserShortDto initiator;
-
-    private Boolean paid;
 
     private Integer participantLimit;
 
     private Boolean requestModeration;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime publishedOn;
 
     private EventState state;
 
-    private Integer confirmedRequests;
-
-    private Long views;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime createdOn;
 }

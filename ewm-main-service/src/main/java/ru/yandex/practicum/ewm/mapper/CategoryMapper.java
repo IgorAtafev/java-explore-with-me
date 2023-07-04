@@ -1,7 +1,6 @@
 package ru.yandex.practicum.ewm.mapper;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.ewm.dto.CategoryDto;
 import ru.yandex.practicum.ewm.model.Category;
 
@@ -9,8 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
+@UtilityClass
 public class CategoryMapper {
 
     public CategoryDto toDto(Category category) {
@@ -24,7 +22,7 @@ public class CategoryMapper {
 
     public List<CategoryDto> toDtos(Collection<Category> categories) {
         return categories.stream()
-                .map(this::toDto)
+                .map(CategoryMapper::toDto)
                 .collect(Collectors.toList());
     }
 

@@ -8,6 +8,8 @@ import lombok.ToString;
 
 import java.time.LocalDateTime;
 
+import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
+
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -20,7 +22,7 @@ public class EventShortDto {
 
     private String annotation;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
 
     private CategoryDto category;

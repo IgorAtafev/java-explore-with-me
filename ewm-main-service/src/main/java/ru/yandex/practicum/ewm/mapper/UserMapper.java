@@ -1,7 +1,6 @@
 package ru.yandex.practicum.ewm.mapper;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.ewm.dto.UserDto;
 import ru.yandex.practicum.ewm.dto.UserShortDto;
 import ru.yandex.practicum.ewm.model.User;
@@ -10,8 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-@RequiredArgsConstructor
+@UtilityClass
 public class UserMapper {
 
     public UserDto toDto(User user) {
@@ -35,7 +33,7 @@ public class UserMapper {
 
     public List<UserDto> toDtos(Collection<User> users) {
         return users.stream()
-                .map(this::toDto)
+                .map(UserMapper::toDto)
                 .collect(Collectors.toList());
     }
 
