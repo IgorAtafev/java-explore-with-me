@@ -20,7 +20,7 @@ import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 public class EventFullDto {
 
     @JsonUnwrapped
-    private EventShortDto shortDto;
+    private EventShortDto shortDto = new EventShortDto();
 
     private String description;
 

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.ewm.dto.EventForRequestDto;
+import ru.yandex.practicum.ewm.dto.EventFullForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateResult;
@@ -42,20 +42,20 @@ public class EventPrivateController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(
             @PathVariable Long userId,
-            @RequestBody @Validated(ValidationOnCreate.class) EventForRequestDto eventForRequestDto
+            @RequestBody @Validated(ValidationOnCreate.class) EventFullForRequestDto eventFullForRequestDto
     ) {
-        log.info("Request received POST /users/{}/events: '{}'", userId, eventForRequestDto);
-        return eventService.createEvent(userId, eventForRequestDto);
+        log.info("Request received POST /users/{}/events: '{}'", userId, eventFullForRequestDto);
+        return eventService.createEvent(userId, eventFullForRequestDto);
     }
 
     @PatchMapping("/{id}")
     public EventFullDto updateEvent(
             @PathVariable Long userId,
             @PathVariable Long id,
-            @RequestBody @Validated(ValidationOnUpdate.class) EventForRequestDto eventForRequestDto
+            @RequestBody @Validated(ValidationOnUpdate.class) EventFullForRequestDto eventFullForRequestDto
     ) {
-        log.info("Request received PATCH /users/{}/events/{}: '{}'", userId, id, eventForRequestDto);
-        return eventService.updateUserEvent(userId, id, eventForRequestDto);
+        log.info("Request received PATCH /users/{}/events/{}: '{}'", userId, id, eventFullForRequestDto);
+        return eventService.updateUserEvent(userId, id, eventFullForRequestDto);
     }
 
     @GetMapping

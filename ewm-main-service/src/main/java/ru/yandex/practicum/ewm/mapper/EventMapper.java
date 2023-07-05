@@ -1,7 +1,7 @@
 package ru.yandex.practicum.ewm.mapper;
 
 import lombok.experimental.UtilityClass;
-import ru.yandex.practicum.ewm.dto.EventForRequestDto;
+import ru.yandex.practicum.ewm.dto.EventFullForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.model.Event;
@@ -56,16 +56,16 @@ public class EventMapper {
                 .collect(Collectors.toList());
     }
 
-    public Event toEvent(EventForRequestDto eventDto) {
+    public Event toEvent(EventFullForRequestDto eventDto) {
         Event event = new Event();
 
-        event.setId(eventDto.getId());
-        event.setTitle(eventDto.getTitle());
-        event.setAnnotation(eventDto.getAnnotation());
+        event.setId(eventDto.getShortDto().getId());
+        event.setTitle(eventDto.getShortDto().getTitle());
+        event.setAnnotation(eventDto.getShortDto().getAnnotation());
         event.setDescription(eventDto.getDescription());
-        event.setEventDate(eventDto.getEventDate());
+        event.setEventDate(eventDto.getShortDto().getEventDate());
         event.setLocation(eventDto.getLocation());
-        event.setPaid(eventDto.getPaid());
+        event.setPaid(eventDto.getShortDto().getPaid());
         event.setParticipantLimit(eventDto.getParticipantLimit());
         event.setRequestModeration(eventDto.getRequestModeration());
 

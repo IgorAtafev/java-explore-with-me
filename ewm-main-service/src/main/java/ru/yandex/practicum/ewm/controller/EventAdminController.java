@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.ewm.dto.EventForRequestDto;
+import ru.yandex.practicum.ewm.dto.EventFullForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.service.EventService;
 import ru.yandex.practicum.ewm.util.EventRequestParam;
@@ -38,10 +38,10 @@ public class EventAdminController {
     @PatchMapping("/{id}")
     public EventFullDto updateEvent(
             @PathVariable Long id,
-            @RequestBody @Validated(ValidationOnUpdate.class) EventForRequestDto eventForRequestDto
+            @RequestBody @Validated(ValidationOnUpdate.class) EventFullForRequestDto eventFullForRequestDto
     ) {
-        log.info("Request received PATCH /admin/events/{}: '{}'", id, eventForRequestDto);
-        return eventService.updateEventByAdmin(id, eventForRequestDto);
+        log.info("Request received PATCH /admin/events/{}: '{}'", id, eventFullForRequestDto);
+        return eventService.updateEventByAdmin(id, eventFullForRequestDto);
     }
 
     @GetMapping

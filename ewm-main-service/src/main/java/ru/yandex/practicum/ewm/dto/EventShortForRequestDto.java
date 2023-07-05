@@ -6,8 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ru.yandex.practicum.ewm.model.Location;
-import ru.yandex.practicum.ewm.model.EventStateAction;
 import ru.yandex.practicum.ewm.validator.ValidationOnCreate;
 import ru.yandex.practicum.ewm.validator.ValidationOnUpdate;
 
@@ -16,7 +14,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -26,7 +23,7 @@ import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class EventForRequestDto {
+public class EventShortForRequestDto {
 
     @Null(groups = ValidationOnCreate.class, message = "Id must be null")
     private Long id;
@@ -51,16 +48,6 @@ public class EventForRequestDto {
     )
     private String annotation;
 
-    @NotBlank(
-            groups = ValidationOnCreate.class,
-            message = "Description cannot be empty and must contain at least one non-whitespace character"
-    )
-    @Size(
-            groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
-            min = 20, max = 7000, message = "Description must contain at least 20 and no more than 7000 characters"
-    )
-    private String description;
-
     @NotNull(groups = ValidationOnCreate.class, message = "Event date cannot be null")
     @Future(
             groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
@@ -68,9 +55,6 @@ public class EventForRequestDto {
     )
     @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
-
-    @NotNull(groups = ValidationOnCreate.class, message = "Location date cannot be null")
-    private Location location;
 
     @JsonProperty("category")
     @NotNull(groups = ValidationOnCreate.class, message = "Category date cannot be null")
@@ -81,15 +65,4 @@ public class EventForRequestDto {
     private Long categoryId;
 
     private Boolean paid;
-
-    @PositiveOrZero(
-            groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
-            message = "Participant limit must be a positive number or 0"
-    )
-    private Integer participantLimit;
-
-    private Boolean requestModeration;
-
-    @Null(groups = ValidationOnCreate.class, message = "State action must be null")
-    private EventStateAction stateAction;
 }

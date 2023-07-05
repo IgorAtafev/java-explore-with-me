@@ -28,9 +28,9 @@ public class EventRequestParam {
 
     private Boolean onlyAvailable;
 
-    LocalDateTime rangeStart;
+    private LocalDateTime rangeStart;
 
-    LocalDateTime rangeEnd;
+    private LocalDateTime rangeEnd;
 
-    String sort;
+    private String sort;
 }

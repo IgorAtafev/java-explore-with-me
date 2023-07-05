@@ -1,7 +1,7 @@
 package ru.yandex.practicum.ewm.service;
 
 import org.springframework.data.domain.Pageable;
-import ru.yandex.practicum.ewm.dto.EventForRequestDto;
+import ru.yandex.practicum.ewm.dto.EventFullForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateResult;
@@ -20,10 +20,10 @@ public interface EventService {
      * If the category is not found throws NotFoundException
      *
      * @param userId
-     * @param eventForRequestDto
+     * @param eventFullForRequestDto
      * @return new event
      */
-    EventFullDto createEvent(Long userId, EventForRequestDto eventForRequestDto);
+    EventFullDto createEvent(Long userId, EventFullForRequestDto eventFullForRequestDto);
 
     /**
      * Updates a user event
@@ -36,10 +36,10 @@ public interface EventService {
      *
      * @param userId
      * @param id
-     * @param eventForRequestDto
+     * @param eventFullForRequestDto
      * @return updated event
      */
-    EventFullDto updateUserEvent(Long userId, Long id, EventForRequestDto eventForRequestDto);
+    EventFullDto updateUserEvent(Long userId, Long id, EventFullForRequestDto eventFullForRequestDto);
 
     /**
      * Updates the event by the admin
@@ -53,10 +53,10 @@ public interface EventService {
      * If the event is canceled and published throws ConflictException
      *
      * @param id
-     * @param eventForRequestDto
+     * @param eventFullForRequestDto
      * @return updated event
      */
-    EventFullDto updateEventByAdmin(Long id, EventForRequestDto eventForRequestDto);
+    EventFullDto updateEventByAdmin(Long id, EventFullForRequestDto eventFullForRequestDto);
 
     /**
      * Returns a list of user events

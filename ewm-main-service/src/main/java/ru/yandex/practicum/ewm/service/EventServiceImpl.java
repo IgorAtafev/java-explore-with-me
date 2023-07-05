@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.ewm.dto.EventForRequestDto;
+import ru.yandex.practicum.ewm.dto.EventFullForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateResult;
@@ -54,11 +54,11 @@ public class EventServiceImpl implements  EventService {
     private final StatsService statsService;
 
     @Override
-    public EventFullDto createEvent(Long userId, EventForRequestDto eventDto) {
+    public EventFullDto createEvent(Long userId, EventFullForRequestDto eventDto) {
         EventState state = EventState.PENDING;
 
-        if (eventDto.getPaid() == null) {
-            eventDto.setPaid(Boolean.FALSE);
+        if (eventDto.getShortDto().getPaid() == null) {
+            eventDto.getShortDto().setPaid(Boolean.FALSE);
         }
         if (eventDto.getParticipantLimit() == null) {
             eventDto.setParticipantLimit(0);
@@ -75,12 +75,13 @@ public class EventServiceImpl implements  EventService {
     }
 
     @Override
-    public EventFullDto updateUserEvent(Long userId, Long id, EventForRequestDto eventDto) {
-        eventDto.setId(id);
+    public EventFullDto updateUserEvent(Long userId, Long id, EventFullForRequestDto eventDto) {
+        eventDto.getShortDto().setId(id);
 
-        Event oldEvent = eventRepository.findByIdAndInitiatorId(eventDto.getId(), userId).orElseThrow(
+        Event oldEvent = eventRepository.findByIdAndInitiatorId(eventDto.getShortDto().getId(), userId).orElseThrow(
                 () -> new NotFoundException(String.format(
-                        "Event with id %d and initiator id %d does not exist", eventDto.getId(), userId)));
+                        "Event with id %d and initiator id %d does not exist", eventDto.getShortDto().getId(),
+                        userId)));
 
         if (EventState.PUBLISHED.equals(oldEvent.getState())) {
             throw new ConflictException("You can't edit a published event");
@@ -98,12 +99,12 @@ public class EventServiceImpl implements  EventService {
     }
 
     @Override
-    public EventFullDto updateEventByAdmin(Long id, EventForRequestDto eventDto) {
-        eventDto.setId(id);
+    public EventFullDto updateEventByAdmin(Long id, EventFullForRequestDto eventDto) {
+        eventDto.getShortDto().setId(id);
 
-        Event oldEvent = eventRepository.findById(eventDto.getId()).orElseThrow(
+        Event oldEvent = eventRepository.findById(eventDto.getShortDto().getId()).orElseThrow(
                 () -> new NotFoundException(String.format(
-                        "Event with id %d does not exist", eventDto.getId())));
+                        "Event with id %d does not exist", eventDto.getShortDto().getId())));
 
         EventState state = getEventState(eventDto, oldEvent,
                 Set.of(EventStateAction.PUBLISH_EVENT, EventStateAction.REJECT_EVENT));
@@ -333,15 +334,15 @@ public class EventServiceImpl implements  EventService {
         return EventMapper.toFullDto(event);
     }
 
-    private Event toEvent(Long userId, EventForRequestDto eventDto, EventState state, Event oldEvent) {
+    private Event toEvent(Long userId, EventFullForRequestDto eventDto, EventState state, Event oldEvent) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new NotFoundException(String.format("Initiator with id %d does not exist", userId)));
 
         Category category = null;
-        if (eventDto.getCategoryId() != null) {
-            category = categoryRepository.findById(eventDto.getCategoryId()).orElseThrow(
+        if (eventDto.getShortDto().getCategoryId() != null) {
+            category = categoryRepository.findById(eventDto.getShortDto().getCategoryId()).orElseThrow(
                     () -> new NotFoundException(
-                            String.format("Category with id %d does not exist", eventDto.getCategoryId())
+                            String.format("Category with id %d does not exist", eventDto.getShortDto().getCategoryId())
                     ));
         }
 
@@ -349,12 +350,12 @@ public class EventServiceImpl implements  EventService {
 
         Event event = EventMapper.toEvent(eventDto);
 
-        if (eventDto.getId() != null) {
-            if (eventDto.getTitle() == null) {
+        if (eventDto.getShortDto().getId() != null) {
+            if (eventDto.getShortDto().getTitle() == null) {
                 event.setTitle(oldEvent.getTitle());
             }
 
-            if (eventDto.getAnnotation() == null) {
+            if (eventDto.getShortDto().getAnnotation() == null) {
                 event.setAnnotation(oldEvent.getAnnotation());
             }
 
@@ -366,11 +367,11 @@ public class EventServiceImpl implements  EventService {
                 event.setLocation(oldEvent.getLocation());
             }
 
-            if (eventDto.getEventDate() == null) {
+            if (eventDto.getShortDto().getEventDate() == null) {
                 event.setEventDate(oldEvent.getEventDate());
             }
 
-            if (eventDto.getPaid() == null) {
+            if (eventDto.getShortDto().getPaid() == null) {
                 event.setPaid(oldEvent.getPaid());
             }
 
@@ -382,7 +383,7 @@ public class EventServiceImpl implements  EventService {
                 event.setRequestModeration(oldEvent.getRequestModeration());
             }
 
-            if (eventDto.getCategoryId() == null) {
+            if (eventDto.getShortDto().getCategoryId() == null) {
                 category = oldEvent.getCategory();
             }
 
@@ -401,7 +402,7 @@ public class EventServiceImpl implements  EventService {
         return event;
     }
 
-    private EventState getEventState(EventForRequestDto eventDto, Event event, Set<EventStateAction> stateActions) {
+    private EventState getEventState(EventFullForRequestDto eventDto, Event event, Set<EventStateAction> stateActions) {
         if (eventDto.getStateAction() == null) {
             return event.getState();
         } else if (stateActions.contains(eventDto.getStateAction())) {
