@@ -10,6 +10,7 @@ import ru.yandex.practicum.ewm.dto.EndpointHitDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.mapper.StatsMapper;
 import ru.yandex.practicum.ewm.repository.StatsRepository;
+import ru.yandex.practicum.ewm.util.StatsRequestParam;
 import ru.yandex.practicum.ewm.validator.ValidationException;
 
 import javax.persistence.EntityManager;
@@ -21,33 +22,31 @@ import java.util.Objects;
 import static ru.yandex.practicum.ewm.model.QEndpointHit.endpointHit;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class StatsServiceImpl implements StatsService {
 
     private final StatsRepository statsRepository;
     private final JPAQueryFactory queryFactory;
-    private final StatsMapper statsMapper;
 
-    public StatsServiceImpl(StatsRepository statsRepository, EntityManager entityManager, StatsMapper statsMapper) {
+    public StatsServiceImpl(StatsRepository statsRepository, EntityManager entityManager) {
         this.statsRepository = statsRepository;
         this.queryFactory = new JPAQueryFactory(entityManager);
-        this.statsMapper = statsMapper;
     }
 
-    @Transactional
     @Override
     public EndpointHitDto saveEndpointHit(EndpointHitDto endpointHitDto) {
-        return statsMapper.toDto(statsRepository.save(statsMapper.toEndpointHit(endpointHitDto)));
+        return StatsMapper.toDto(statsRepository.save(StatsMapper.toEndpointHit(endpointHitDto)));
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        if (start.isAfter(end)) {
+    public List<ViewStatsDto> getStats(StatsRequestParam requestParam) {
+        if (requestParam.getStart().isAfter(requestParam.getEnd())) {
             throw new ValidationException(String.format("The start of the range must be before the end of the range"));
         }
 
         NumberExpression<Long> count = endpointHit.ip.count();
-        if (Objects.equals(Boolean.TRUE, unique)) {
+        if (Objects.equals(Boolean.TRUE, requestParam.getUnique())) {
             count = endpointHit.ip.countDistinct();
         }
 
@@ -58,7 +57,7 @@ public class StatsServiceImpl implements StatsService {
                         endpointHit.uri,
                         count))
                 .from(endpointHit)
-                .where(getCondition(start, end, uris))
+                .where(getCondition(requestParam.getStart(), requestParam.getEnd(), requestParam.getUris()))
                 .groupBy(endpointHit.app, endpointHit.uri)
                 .orderBy(count.desc())
                 .fetch();
@@ -76,6 +75,6 @@ public class StatsServiceImpl implements StatsService {
 
         return conditions.stream()
                 .reduce(BooleanExpression::and)
-                .get();
+                .orElse(null);
     }
 }

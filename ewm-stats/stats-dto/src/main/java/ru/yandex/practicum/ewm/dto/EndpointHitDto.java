@@ -8,9 +8,10 @@ import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+
+import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 
 @Getter
 @Setter
@@ -28,11 +29,10 @@ public class EndpointHitDto {
     @Size(max = 255, message = "URI must contain no more than 255 characters")
     private String uri;
 
-    @NotNull(message = "IP cannot be null")
-    @Pattern(regexp = "^(?:\\d{1,3}\\.){3}\\d{1,3}$", message = "IP must match the specified regular expression")
+    @NotBlank(message = "IP cannot be empty")
     private String ip;
 
     @NotNull(message = "Timestamp cannot be null")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime timestamp;
 }

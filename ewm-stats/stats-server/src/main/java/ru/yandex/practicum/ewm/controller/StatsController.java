@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.EndpointHitDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.service.StatsService;
+import ru.yandex.practicum.ewm.util.StatsRequestParam;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 
 @RestController
 @Slf4j
@@ -25,7 +28,6 @@ import java.util.List;
 @Validated
 public class StatsController {
 
-    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private final StatsService statsService;
 
     @PostMapping("/hit")
@@ -42,6 +44,14 @@ public class StatsController {
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") Boolean unique
     ) {
-        return statsService.getStats(start, end, uris, unique);
+        StatsRequestParam requestParam = StatsRequestParam.builder()
+                .start(start)
+                .end(end)
+                .uris(uris)
+                .unique(unique)
+                .build();
+
+        log.info("Request received GET /stats?start={}&end={}&uris={}&unique={}", start, end, uris, unique);
+        return statsService.getStats(requestParam);
     }
 }

@@ -4,12 +4,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.yandex.practicum.ewm.dto.EndpointHitDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.mapper.StatsMapper;
 import ru.yandex.practicum.ewm.model.EndpointHit;
 import ru.yandex.practicum.ewm.repository.StatsRepository;
+import ru.yandex.practicum.ewm.util.StatsRequestParam;
 import ru.yandex.practicum.ewm.validator.ValidationException;
 
 import java.time.LocalDateTime;
@@ -29,9 +32,6 @@ class StatsServiceImplTest {
     @Mock
     private StatsRepository statsRepository;
 
-    @Mock
-    private StatsMapper statsMapper;
-
     @InjectMocks
     private StatsServiceImpl statsService;
 
@@ -40,10 +40,17 @@ class StatsServiceImplTest {
         LocalDateTime start = LocalDateTime.of(2023, 5, 1, 0, 2, 0);
         LocalDateTime end = LocalDateTime.of(2023, 5, 1, 0, 0, 0);
 
-        assertThatExceptionOfType(ValidationException.class)
-                .isThrownBy(() -> statsService.getStats(start, end, List.of(), false));
+        StatsRequestParam requestParam = StatsRequestParam.builder()
+                .start(start)
+                .end(end)
+                .uris(List.of())
+                .unique(false)
+                .build();
 
-        verifyNoInteractions(statsRepository, statsMapper);
+        assertThatExceptionOfType(ValidationException.class)
+                .isThrownBy(() -> statsService.getStats(requestParam));
+
+        verifyNoInteractions(statsRepository);
     }
 
     @Test
@@ -51,16 +58,17 @@ class StatsServiceImplTest {
         EndpointHitDto endpointHitDto = initEndpointHitDto();
         EndpointHit endpointHit = initEndpointHit();
 
-        when(statsMapper.toEndpointHit(endpointHitDto)).thenReturn(endpointHit);
+        MockedStatic<StatsMapper> statsMapper = Mockito.mockStatic(StatsMapper.class);
+        statsMapper.when(() -> StatsMapper.toEndpointHit(endpointHitDto))
+                .thenReturn(endpointHit);
         when(statsRepository.save(endpointHit)).thenReturn(endpointHit);
-        when(statsMapper.toDto(endpointHit)).thenReturn(endpointHitDto);
+        statsMapper.when(() -> StatsMapper.toDto(endpointHit))
+                .thenReturn(endpointHitDto);
 
         assertThat(statsService.saveEndpointHit(endpointHitDto)).isEqualTo(endpointHitDto);
 
-        verify(statsMapper, times(1)).toEndpointHit(endpointHitDto);
         verify(statsRepository, times(1)).save(endpointHit);
-        verify(statsMapper, times(1)).toDto(endpointHit);
-        verifyNoMoreInteractions(statsMapper, statsRepository);
+        verifyNoMoreInteractions(statsRepository);
     }
 
     private EndpointHitDto initEndpointHitDto() {
