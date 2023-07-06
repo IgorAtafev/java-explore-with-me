@@ -40,8 +40,7 @@ public class CompilationServiceImpl implements CompilationService {
         compilationForRequestDto.setId(id);
 
         Compilation oldCompilation = compilationRepository.findById(compilationForRequestDto.getId()).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Compilation with id %d does not exist", compilationForRequestDto.getId())));
+                () -> new NotFoundException(String.format("Compilation with id %d does not exist", id)));
 
         Compilation compilation = toCompilation(compilationForRequestDto, oldCompilation);
 
@@ -61,8 +60,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto getCompilationById(Long id) {
         Compilation compilation = compilationRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Compilation with id %d does not exist", id)));
+                () -> new NotFoundException(String.format("Compilation with id %d does not exist", id)));
 
         return CompilationMapper.toDto(compilation);
     }

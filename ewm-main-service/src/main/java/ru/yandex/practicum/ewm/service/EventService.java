@@ -1,12 +1,9 @@
 package ru.yandex.practicum.ewm.service;
 
 import org.springframework.data.domain.Pageable;
-import ru.yandex.practicum.ewm.dto.EventFullForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
-import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateRequest;
-import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateResult;
+import ru.yandex.practicum.ewm.dto.EventFullForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
-import ru.yandex.practicum.ewm.dto.ParticipationRequestDto;
 import ru.yandex.practicum.ewm.util.EventRequestParam;
 
 import javax.servlet.http.HttpServletRequest;
@@ -89,35 +86,6 @@ public interface EventService {
      * @return list of events
      */
     List<EventFullDto> getEventsByAdmin(EventRequestParam requestParam, Pageable page);
-
-    /**
-     * Updates the status of event requests
-     * If the initiator is not found throws NotFoundException
-     * If the event is not found throws NotFoundException
-     * If the status of requests is not confirmed and not rejected throws ValidationException
-     * If the event request limit is reached throws ConflictException
-     * If requests are not pending throws ConflictException
-     * If, upon confirmation of the request, the limit of requests for the event is exhausted,
-     * then all unconfirmed requests must be rejected
-     *
-     * @param userId
-     * @param id
-     * @param requestsDto
-     * @return lists of confirmed and rejected requests
-     */
-    EventRequestStatusUpdateResult updateRequestsStatus(
-            Long userId, Long id, EventRequestStatusUpdateRequest requestsDto);
-
-    /**
-     * Returns a list of requests to participate in the event
-     * If the initiator is not found throws NotFoundException
-     * If the event is not found throws NotFoundException
-     *
-     * @param userId
-     * @param id
-     * @return list of user events
-     */
-    List<ParticipationRequestDto> getRequests(Long userId, Long id);
 
     /**
      * Returns a list of public events

@@ -37,7 +37,7 @@ public class EventFullForRequestDto {
     )
     private String description;
 
-    @NotNull(groups = ValidationOnCreate.class, message = "Location date cannot be null")
+    @NotNull(groups = ValidationOnCreate.class, message = "Location cannot be null")
     private Location location;
 
     @PositiveOrZero(

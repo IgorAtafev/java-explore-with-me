@@ -19,7 +19,7 @@ import javax.validation.constraints.Size;
 @ToString
 public class UserDto {
 
-    @Null(groups = ValidationOnCreate.class, message = "Id must be null")
+    @Null(groups = {ValidationOnCreate.class, ValidationOnUpdate.class}, message = "Id must be null")
     private Long id;
 
     @NotEmpty(groups = ValidationOnCreate.class, message = "Email cannot be empty")

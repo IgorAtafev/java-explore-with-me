@@ -35,6 +35,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
+        categoryDto.setId(id);
+
         Category category = CategoryMapper.toCategory(categoryDto);
 
         if (!categoryRepository.existsById(id)) {
@@ -44,8 +46,6 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.existsByIdNotAndNameIgnoreCase(id, category.getName())) {
             throw new ConflictException(String.format("Category with name %s exists", category.getName()));
         }
-
-        category.setId(id);
 
         return CategoryMapper.toDto(categoryRepository.save(category));
     }

@@ -21,6 +21,7 @@ import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateResult;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.dto.ParticipationRequestDto;
 import ru.yandex.practicum.ewm.service.EventService;
+import ru.yandex.practicum.ewm.service.ParticipationRequestService;
 import ru.yandex.practicum.ewm.util.Pagination;
 import ru.yandex.practicum.ewm.validator.ValidationOnCreate;
 import ru.yandex.practicum.ewm.validator.ValidationOnUpdate;
@@ -37,6 +38,7 @@ import java.util.List;
 public class EventPrivateController {
 
     private final EventService eventService;
+    private final ParticipationRequestService requestService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -82,12 +84,12 @@ public class EventPrivateController {
             @RequestBody @Validated(ValidationOnUpdate.class) EventRequestStatusUpdateRequest requestsDto
     ) {
         log.info("Request received PATCH /users/{}/events/{}/requests: '{}'", userId, id, requestsDto);
-        return eventService.updateRequestsStatus(userId, id, requestsDto);
+        return requestService.updateRequestsStatus(userId, id, requestsDto);
     }
 
     @GetMapping("/{id}/requests")
     public List<ParticipationRequestDto> getRequests(@PathVariable Long userId, @PathVariable Long id) {
         log.info("Request received GET /users/{}/events/{}/requests", userId, id);
-        return eventService.getRequests(userId, id);
+        return requestService.getRequests(userId, id);
     }
 }

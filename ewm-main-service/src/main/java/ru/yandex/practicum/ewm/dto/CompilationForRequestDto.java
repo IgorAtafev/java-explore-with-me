@@ -18,7 +18,7 @@ import java.util.List;
 @ToString
 public class CompilationForRequestDto {
 
-    @Null(groups = ValidationOnCreate.class, message = "Id must be null")
+    @Null(groups = {ValidationOnCreate.class, ValidationOnUpdate.class}, message = "Id must be null")
     private Long id;
 
     @NotBlank(

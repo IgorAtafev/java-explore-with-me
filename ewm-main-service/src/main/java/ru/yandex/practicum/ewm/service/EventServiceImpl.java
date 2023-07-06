@@ -5,15 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.ewm.dto.EventFullForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
-import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateRequest;
-import ru.yandex.practicum.ewm.dto.EventRequestStatusUpdateResult;
+import ru.yandex.practicum.ewm.dto.EventFullForRequestDto;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
-import ru.yandex.practicum.ewm.dto.ParticipationRequestDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.mapper.EventMapper;
-import ru.yandex.practicum.ewm.mapper.ParticipationRequestMapper;
 import ru.yandex.practicum.ewm.model.Category;
 import ru.yandex.practicum.ewm.model.Event;
 import ru.yandex.practicum.ewm.model.EventSortType;
@@ -78,10 +74,9 @@ public class EventServiceImpl implements  EventService {
     public EventFullDto updateUserEvent(Long userId, Long id, EventFullForRequestDto eventDto) {
         eventDto.getShortDto().setId(id);
 
-        Event oldEvent = eventRepository.findByIdAndInitiatorId(eventDto.getShortDto().getId(), userId).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Event with id %d and initiator id %d does not exist", eventDto.getShortDto().getId(),
-                        userId)));
+        Event oldEvent = eventRepository.findByIdAndInitiatorId(id, userId).orElseThrow(
+                () -> new NotFoundException(String.format("Event with id %d and initiator id %d does not exist",
+                        id, userId)));
 
         if (EventState.PUBLISHED.equals(oldEvent.getState())) {
             throw new ConflictException("You can't edit a published event");
@@ -102,15 +97,15 @@ public class EventServiceImpl implements  EventService {
     public EventFullDto updateEventByAdmin(Long id, EventFullForRequestDto eventDto) {
         eventDto.getShortDto().setId(id);
 
-        Event oldEvent = eventRepository.findById(eventDto.getShortDto().getId()).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Event with id %d does not exist", eventDto.getShortDto().getId())));
+        Event oldEvent = eventRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(String.format("Event with id %d does not exist", id)));
 
         EventState state = getEventState(eventDto, oldEvent,
                 Set.of(EventStateAction.PUBLISH_EVENT, EventStateAction.REJECT_EVENT));
         checkEventState(state, oldEvent);
 
         Event event = toEvent(oldEvent.getInitiator().getId(), eventDto, state, oldEvent);
+        event.setId(id);
 
         checkEventDateByCurrentDate(event.getEventDate());
         if (event.getPublishedOn() != null) {
@@ -141,8 +136,8 @@ public class EventServiceImpl implements  EventService {
         }
 
         Event event = eventRepository.findByIdAndInitiatorId(id, userId).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Event with id %d and initiator id %d does not exist", id, userId)));
+                () -> new NotFoundException(String.format("Event with id %d and initiator id %d does not exist",
+                        id, userId)));
 
         event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
                 id, ParticipationRequestStatus.CONFIRMED));
@@ -186,84 +181,6 @@ public class EventServiceImpl implements  EventService {
         List<Event> events = getEventsByCondition(conditions, page);
 
         return EventMapper.toFullDtos(events);
-    }
-
-    @Override
-    public EventRequestStatusUpdateResult updateRequestsStatus(
-            Long userId, Long id, EventRequestStatusUpdateRequest requestsDto
-    ) {
-        checkParticipationRequestStatus(requestsDto.getStatus());
-
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(String.format("Initiator with id %d does not exist", userId));
-        }
-
-        Event event = eventRepository.findByIdAndInitiatorId(id, userId).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Event with id %d and initiator id %d does not exist", id, userId)));
-
-        long currentConfirmedRequests = requestRepository.countByEventIdAndStatus(
-                id, ParticipationRequestStatus.CONFIRMED);
-        if (event.getParticipantLimit() > 0 && currentConfirmedRequests == event.getParticipantLimit()) {
-            throw new ConflictException("Event request limit reached");
-        }
-
-        List<ParticipationRequest> requests = requestRepository.findByIdInAndEventIdAndStatus(
-                requestsDto.getRequestIds(), id, ParticipationRequestStatus.PENDING);
-
-        if (requestsDto.getRequestIds().size() != requests.size()) {
-            throw new ConflictException("The status can only be changed for participations in the pending state");
-        }
-
-        if (ParticipationRequestStatus.CONFIRMED.equals(requestsDto.getStatus())
-                && (event.getParticipantLimit() == 0
-                    || Boolean.FALSE.equals(event.getRequestModeration()))) {
-            return new EventRequestStatusUpdateResult();
-        }
-
-        List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
-        List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
-
-        for (ParticipationRequest request : requests) {
-            ParticipationRequestStatus currentStatus = requestsDto.getStatus();
-
-            if (ParticipationRequestStatus.CONFIRMED.equals(requestsDto.getStatus())) {
-                if (event.getParticipantLimit() > currentConfirmedRequests) {
-                    currentConfirmedRequests++;
-                } else {
-                    currentStatus = ParticipationRequestStatus.REJECTED;
-                }
-            }
-
-            request.setStatus(currentStatus);
-
-            ParticipationRequestDto requestDto = ParticipationRequestMapper.toDto(request);
-
-            if (ParticipationRequestStatus.CONFIRMED.equals(currentStatus)) {
-                confirmedRequests.add(requestDto);
-            } else {
-                rejectedRequests.add(requestDto);
-            }
-        }
-
-        requestRepository.saveAll(requests);
-
-        return new EventRequestStatusUpdateResult(confirmedRequests, rejectedRequests);
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<ParticipationRequestDto> getRequests(Long userId, Long id) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(String.format("Initiator with id %d does not exist", userId));
-        }
-
-        if (!eventRepository.existsByIdAndInitiatorId(id, userId)) {
-            throw new NotFoundException(String.format(
-                    "Event with id %d and initiator id %d does not exist", id, userId));
-        }
-
-        return ParticipationRequestMapper.toDtos(requestRepository.findByEventId(id));
     }
 
     @Transactional(readOnly = true)
@@ -322,8 +239,7 @@ public class EventServiceImpl implements  EventService {
     @Override
     public EventFullDto getPublicEventById(Long id, HttpServletRequest request) {
         Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Public event with id %d does not exist", id)));
+                () -> new NotFoundException(String.format("Public event with id %d does not exist", id)));
 
         event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
                 id, ParticipationRequestStatus.CONFIRMED));
@@ -341,16 +257,15 @@ public class EventServiceImpl implements  EventService {
         Category category = null;
         if (eventDto.getShortDto().getCategoryId() != null) {
             category = categoryRepository.findById(eventDto.getShortDto().getCategoryId()).orElseThrow(
-                    () -> new NotFoundException(
-                            String.format("Category with id %d does not exist", eventDto.getShortDto().getCategoryId())
-                    ));
+                    () -> new NotFoundException(String.format("Category with id %d does not exist",
+                            eventDto.getShortDto().getCategoryId())));
         }
 
         LocalDateTime created = LocalDateTime.now();
 
         Event event = EventMapper.toEvent(eventDto);
 
-        if (eventDto.getShortDto().getId() != null) {
+        if (oldEvent != null) {
             if (eventDto.getShortDto().getTitle() == null) {
                 event.setTitle(oldEvent.getTitle());
             }
@@ -454,14 +369,6 @@ public class EventServiceImpl implements  EventService {
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
             throw new ValidationException("Unknown event state: UNSUPPORTED_STATUS");
-        }
-    }
-
-    private void checkParticipationRequestStatus(ParticipationRequestStatus status) {
-        if (!Set.of(ParticipationRequestStatus.CONFIRMED, ParticipationRequestStatus.REJECTED)
-                .contains(status)
-        ) {
-            throw new ValidationException("Unknown participation request status: UNSUPPORTED_STATUS");
         }
     }
 

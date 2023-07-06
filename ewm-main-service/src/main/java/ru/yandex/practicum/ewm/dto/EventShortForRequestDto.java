@@ -25,7 +25,7 @@ import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 @ToString
 public class EventShortForRequestDto {
 
-    @Null(groups = ValidationOnCreate.class, message = "Id must be null")
+    @Null(groups = {ValidationOnCreate.class, ValidationOnUpdate.class}, message = "Id must be null")
     private Long id;
 
     @NotBlank(
@@ -57,7 +57,7 @@ public class EventShortForRequestDto {
     private LocalDateTime eventDate;
 
     @JsonProperty("category")
-    @NotNull(groups = ValidationOnCreate.class, message = "Category date cannot be null")
+    @NotNull(groups = ValidationOnCreate.class, message = "Category cannot be null")
     @Positive(
             groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
             message = "Category must be a strictly positive number"

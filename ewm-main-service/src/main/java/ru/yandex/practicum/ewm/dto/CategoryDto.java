@@ -17,7 +17,7 @@ import javax.validation.constraints.Size;
 @ToString
 public class CategoryDto {
 
-    @Null(groups = ValidationOnCreate.class, message = "Id must be null")
+    @Null(groups = {ValidationOnCreate.class, ValidationOnUpdate.class}, message = "Id must be null")
     private Long id;
 
     @NotBlank(
@@ -26,7 +26,7 @@ public class CategoryDto {
     )
     @Size(
             groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
-            min = 2, max = 50, message = "App must contain at least 2 and no more than 50 characters"
+            min = 2, max = 50, message = "Name must contain at least 2 and no more than 50 characters"
     )
     private String name;
 }
