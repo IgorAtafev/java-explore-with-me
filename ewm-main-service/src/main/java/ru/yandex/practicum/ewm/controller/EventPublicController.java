@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.ewm.dto.CommentShortDto;
 import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
+import ru.yandex.practicum.ewm.service.CommentService;
 import ru.yandex.practicum.ewm.service.EventService;
 import ru.yandex.practicum.ewm.util.EventRequestParam;
 import ru.yandex.practicum.ewm.util.Pagination;
@@ -32,6 +34,7 @@ import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 public class EventPublicController {
 
     private final EventService eventService;
+    private final CommentService commentService;
 
     @GetMapping
     public List<EventShortDto> getEvents(
@@ -64,9 +67,21 @@ public class EventPublicController {
         return eventService.getPublicEvents(requestParam, request, page);
     }
 
-    @GetMapping("/{id}")
-    public EventFullDto getEventById(@PathVariable Long id, HttpServletRequest request) {
-        log.info("Request received GET /events/{}", id);
-        return eventService.getPublicEventById(id, request);
+    @GetMapping("/{eventId}")
+    public EventFullDto getEventById(@PathVariable Long eventId, HttpServletRequest request) {
+        log.info("Request received GET /events/{}", eventId);
+        return eventService.getPublicEventById(eventId, request);
+    }
+
+    @GetMapping("/{eventId}/comments")
+    public List<CommentShortDto> getCommentsToEvent(@PathVariable Long eventId) {
+        log.info("Request received GET /events/{}/comments", eventId);
+        return commentService.getCommentsToEvent(eventId);
+    }
+
+    @GetMapping("/{eventId}/comments/{id}")
+    public CommentShortDto getCommentToEventById(@PathVariable Long eventId, @PathVariable Long id) {
+        log.info("Request received GET /events/{}/comments/{}", eventId, id);
+        return commentService.getCommentToEventById(eventId, id);
     }
 }

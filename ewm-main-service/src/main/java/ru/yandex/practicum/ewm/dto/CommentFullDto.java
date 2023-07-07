@@ -14,26 +14,16 @@ import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class EventShortDto {
+public class CommentFullDto {
 
     private Long id;
 
-    private String title;
+    private String text;
 
-    private String annotation;
+    private EventShortDto event;
+
+    private UserShortDto author;
 
     @JsonFormat(pattern = DATE_TIME_FORMAT)
-    private LocalDateTime eventDate;
-
-    private CategoryDto category;
-
-    private UserShortDto initiator;
-
-    private Boolean paid;
-
-    private Integer confirmedRequests;
-
-    private Integer comments;
-
-    private Long views;
+    private LocalDateTime created;
 }

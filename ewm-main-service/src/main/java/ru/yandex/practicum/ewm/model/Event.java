@@ -72,6 +72,9 @@ public class Event {
     private Integer confirmedRequests = 0;
 
     @Transient
+    private Integer comments = 0;
+
+    @Transient
     private Long views;
 
     @Column

@@ -11,6 +11,7 @@ import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.mapper.EventMapper;
 import ru.yandex.practicum.ewm.model.Category;
+import ru.yandex.practicum.ewm.model.Comment;
 import ru.yandex.practicum.ewm.model.Event;
 import ru.yandex.practicum.ewm.model.EventSortType;
 import ru.yandex.practicum.ewm.model.EventState;
@@ -19,6 +20,7 @@ import ru.yandex.practicum.ewm.model.ParticipationRequest;
 import ru.yandex.practicum.ewm.model.ParticipationRequestStatus;
 import ru.yandex.practicum.ewm.model.User;
 import ru.yandex.practicum.ewm.repository.CategoryRepository;
+import ru.yandex.practicum.ewm.repository.CommentRepository;
 import ru.yandex.practicum.ewm.repository.EventRepository;
 import ru.yandex.practicum.ewm.repository.ParticipationRequestRepository;
 import ru.yandex.practicum.ewm.repository.UserRepository;
@@ -47,6 +49,7 @@ public class EventServiceImpl implements  EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ParticipationRequestRepository requestRepository;
+    private final CommentRepository commentRepository;
     private final StatsService statsService;
 
     @Override
@@ -124,6 +127,7 @@ public class EventServiceImpl implements  EventService {
 
         List<Event> events = eventRepository.findByInitiatorId(userId, page);
         setConfirmedRequestsForEvents(events);
+        setCommentsForEvents(events);
 
         return EventMapper.toShortDtos(events);
     }
@@ -141,6 +145,8 @@ public class EventServiceImpl implements  EventService {
 
         event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
                 id, ParticipationRequestStatus.CONFIRMED));
+
+        event.setComments((int)commentRepository.countByEventId(id));
 
         return EventMapper.toFullDto(event);
     }
@@ -243,6 +249,8 @@ public class EventServiceImpl implements  EventService {
 
         event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
                 id, ParticipationRequestStatus.CONFIRMED));
+
+        event.setComments((int)commentRepository.countByEventId(id));
 
         statsService.saveEndpointHit(request);
         event.setViews(getViewForEvent(event.getPublishedOn(), request));
@@ -394,6 +402,27 @@ public class EventServiceImpl implements  EventService {
         }
     }
 
+    private void setCommentsForEvents(List<Event> events) {
+        if (events.isEmpty()) {
+            return;
+        }
+
+        List<Long> eventIds = events.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, List<Comment>> comments = commentRepository.findByEventIdIn(eventIds).stream()
+                .collect(Collectors.groupingBy(item -> item.getEvent().getId()));
+
+        events.forEach(event -> setCommentsForEvent(event, comments.get(event.getId())));
+    }
+
+    private void setCommentsForEvent(Event event, List<Comment> comments) {
+        if (comments != null) {
+            event.setComments(comments.size());
+        }
+    }
+
     private List<Event> getEventsByCondition(List<Specification> conditions, Pageable page) {
         List<Event> events;
 
@@ -409,6 +438,7 @@ public class EventServiceImpl implements  EventService {
         }
 
         setConfirmedRequestsForEvents(events);
+        setCommentsForEvents(events);
 
         return events;
     }
