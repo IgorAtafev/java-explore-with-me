@@ -43,8 +43,7 @@ public class CommentServiceImpl implements CommentService {
                 () -> new NotFoundException(String.format("Author with id %d does not exist", userId)));
 
         Event event = eventRepository.findById(commentDto.getEventId()).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Event with id %d does not exist", commentDto.getEventId())));
+                () -> new NotFoundException(String.format("Event with id %d does not exist", commentDto.getEventId())));
 
         if (!requestRepository.existsByRequesterIdAndEventIdAndStatus(
                 userId, commentDto.getEventId(), ParticipationRequestStatus.CONFIRMED
@@ -75,8 +74,8 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Comment comment = commentRepository.findByIdAndAuthorId(id, userId).orElseThrow(
-                () -> new NotFoundException(String.format(
-                        "Comment with id %d and author id %d does not exist", id, userId)));
+                () -> new NotFoundException(String.format("Comment with id %d and author id %d does not exist",
+                        id, userId)));
 
         comment.setText(commentDto.getText());
 
@@ -90,7 +89,8 @@ public class CommentServiceImpl implements CommentService {
         }
 
         if (!commentRepository.existsByIdAndAuthorId(id, userId)) {
-            throw new NotFoundException(String.format("Comment with id %d and author id %d does not exist", id));
+            throw new NotFoundException(String.format("Comment with id %d and author id %d does not exist",
+                    id, userId));
         }
 
         commentRepository.deleteById(id);
@@ -178,7 +178,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         Comment comment = commentRepository.findByIdAndEventId(id, eventId).orElseThrow(
-                () -> new NotFoundException(String.format("Comment with id %d and Event id %d does not exist",
+                () -> new NotFoundException(String.format("Comment with id %d and event id %d does not exist",
                         id, eventId)));
 
         return CommentMapper.toShortDto(comment);
