@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.ewm.dto.EndpointHitDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.mapper.StatsMapper;
+import ru.yandex.practicum.ewm.model.QEndpointHit;
 import ru.yandex.practicum.ewm.repository.StatsRepository;
 import ru.yandex.practicum.ewm.util.StatsRequestParam;
 import ru.yandex.practicum.ewm.validator.ValidationException;
@@ -18,8 +19,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static ru.yandex.practicum.ewm.model.QEndpointHit.endpointHit;
 
 @Service
 @Transactional
@@ -45,20 +44,20 @@ public class StatsServiceImpl implements StatsService {
             throw new ValidationException(String.format("The start of the range must be before the end of the range"));
         }
 
-        NumberExpression<Long> count = endpointHit.ip.count();
+        NumberExpression<Long> count = QEndpointHit.endpointHit.ip.count();
         if (Objects.equals(Boolean.TRUE, requestParam.getUnique())) {
-            count = endpointHit.ip.countDistinct();
+            count = QEndpointHit.endpointHit.ip.countDistinct();
         }
 
         return queryFactory.select(
                 Projections.constructor(
                         ViewStatsDto.class,
-                        endpointHit.app,
-                        endpointHit.uri,
+                        QEndpointHit.endpointHit.app,
+                        QEndpointHit.endpointHit.uri,
                         count))
-                .from(endpointHit)
+                .from(QEndpointHit.endpointHit)
                 .where(getCondition(requestParam.getStart(), requestParam.getEnd(), requestParam.getUris()))
-                .groupBy(endpointHit.app, endpointHit.uri)
+                .groupBy(QEndpointHit.endpointHit.app, QEndpointHit.endpointHit.uri)
                 .orderBy(count.desc())
                 .fetch();
     }
@@ -66,11 +65,13 @@ public class StatsServiceImpl implements StatsService {
     private BooleanExpression getCondition(LocalDateTime start, LocalDateTime end, List<String> uris) {
         List<BooleanExpression> conditions = new ArrayList<>();
 
-        conditions.add(endpointHit.timestamp.after(start).or(endpointHit.timestamp.eq(start)));
-        conditions.add(endpointHit.timestamp.before(end).or(endpointHit.timestamp.eq(end)));
+        conditions.add(QEndpointHit.endpointHit.timestamp.after(start)
+                .or(QEndpointHit.endpointHit.timestamp.eq(start)));
+        conditions.add(QEndpointHit.endpointHit.timestamp.before(end)
+                .or(QEndpointHit.endpointHit.timestamp.eq(end)));
 
         if (uris != null) {
-            conditions.add(endpointHit.uri.in(uris));
+            conditions.add(QEndpointHit.endpointHit.uri.in(uris));
         }
 
         return conditions.stream()

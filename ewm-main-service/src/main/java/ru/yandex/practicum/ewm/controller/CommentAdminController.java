@@ -16,14 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.ewm.dto.CommentFullDto;
 import ru.yandex.practicum.ewm.service.CommentService;
 import ru.yandex.practicum.ewm.util.CommentRequestParam;
+import ru.yandex.practicum.ewm.util.DateTimeUtils;
 import ru.yandex.practicum.ewm.util.Pagination;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 
 @RestController
 @RequestMapping("/admin/comments")
@@ -45,8 +44,10 @@ public class CommentAdminController {
     public List<CommentFullDto> getComments(
             @RequestParam(required = false) List<Long> events,
             @RequestParam(required = false) List<Long> users,
-            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
-            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = DateTimeUtils.DATE_TIME_FORMAT) LocalDateTime rangeStart,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = DateTimeUtils.DATE_TIME_FORMAT) LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size
     ) {

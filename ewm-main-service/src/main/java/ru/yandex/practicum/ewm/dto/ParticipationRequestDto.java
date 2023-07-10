@@ -6,10 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import ru.yandex.practicum.ewm.model.ParticipationRequestStatus;
+import ru.yandex.practicum.ewm.util.DateTimeUtils;
 
 import java.time.LocalDateTime;
-
-import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 
 @Getter
 @Setter
@@ -25,6 +24,6 @@ public class ParticipationRequestDto {
 
     private ParticipationRequestStatus status;
 
-    @JsonFormat(pattern = DATE_TIME_FORMAT)
+    @JsonFormat(pattern = DateTimeUtils.DATE_TIME_FORMAT)
     private LocalDateTime created;
 }

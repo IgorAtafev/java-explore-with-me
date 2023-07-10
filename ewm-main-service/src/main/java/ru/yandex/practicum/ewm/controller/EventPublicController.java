@@ -15,6 +15,7 @@ import ru.yandex.practicum.ewm.dto.EventFullDto;
 import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.service.CommentService;
 import ru.yandex.practicum.ewm.service.EventService;
+import ru.yandex.practicum.ewm.util.DateTimeUtils;
 import ru.yandex.practicum.ewm.util.EventRequestParam;
 import ru.yandex.practicum.ewm.util.Pagination;
 
@@ -23,8 +24,6 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 
 @RestController
 @RequestMapping("/events")
@@ -42,8 +41,10 @@ public class EventPublicController {
             @RequestParam(required = false) List<Long> categories,
             @RequestParam(required = false) Boolean paid,
             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
-            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
-            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = DateTimeUtils.DATE_TIME_FORMAT) LocalDateTime rangeStart,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = DateTimeUtils.DATE_TIME_FORMAT) LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "EVENT_DATE") String sort,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size,

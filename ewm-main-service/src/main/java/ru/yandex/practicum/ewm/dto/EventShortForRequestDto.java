@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.yandex.practicum.ewm.util.DateTimeUtils;
 import ru.yandex.practicum.ewm.validator.ValidationOnCreate;
 import ru.yandex.practicum.ewm.validator.ValidationOnUpdate;
 
@@ -16,8 +17,6 @@ import javax.validation.constraints.Null;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
-
-import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 
 @Getter
 @Setter
@@ -53,7 +52,7 @@ public class EventShortForRequestDto {
             groups = {ValidationOnCreate.class, ValidationOnUpdate.class},
             message = "Event date must be in the future"
     )
-    @JsonFormat(pattern = DATE_TIME_FORMAT)
+    @JsonFormat(pattern = DateTimeUtils.DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
 
     @JsonProperty("category")
