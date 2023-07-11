@@ -17,7 +17,6 @@ import ru.yandex.practicum.ewm.repository.CommentRepository;
 import ru.yandex.practicum.ewm.repository.EventRepository;
 import ru.yandex.practicum.ewm.repository.ParticipationRequestRepository;
 import ru.yandex.practicum.ewm.repository.UserRepository;
-import ru.yandex.practicum.ewm.specification.CommentSpecification;
 import ru.yandex.practicum.ewm.util.CommentRequestParam;
 import ru.yandex.practicum.ewm.validator.ConflictException;
 import ru.yandex.practicum.ewm.validator.NotFoundException;
@@ -138,21 +137,25 @@ public class CommentServiceImpl implements CommentService {
             throw new ValidationException(String.format("The start of the range must be before the end of the range"));
         }
 
-        List<Specification> conditions = new ArrayList<>();
+        List<Specification<Comment>> conditions = new ArrayList<>();
 
         if (requestParam.getEvents() != null) {
-            conditions.add(CommentSpecification.findByEventIdIn(requestParam.getEvents()));
+            conditions.add((root, query, cb) -> cb.in(root.<Long>get("event").get("id"))
+                    .value(requestParam.getEvents()));
         }
 
         if (requestParam.getUsers() != null) {
-            conditions.add(CommentSpecification.findByAuthorIdIn(requestParam.getUsers()));
+            conditions.add((root, query, cb) -> cb.in(root.<Long>get("author").get("id"))
+                    .value(requestParam.getUsers()));
         }
 
         if (requestParam.getRangeStart() != null) {
-            conditions.add(CommentSpecification.findByRangeStartGreaterThanEqual(requestParam.getRangeStart()));
+            conditions.add((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("created"),
+                    requestParam.getRangeStart()));
         }
         if (requestParam.getRangeEnd() != null) {
-            conditions.add(CommentSpecification.findByRangeEndLessThanEqual(requestParam.getRangeEnd()));
+            conditions.add((root, query, cb) -> cb.lessThanOrEqualTo(root.get("created"),
+                    requestParam.getRangeEnd()));
         }
 
         List<Comment> comments = getCommentsByCondition(conditions, page);
@@ -184,7 +187,7 @@ public class CommentServiceImpl implements CommentService {
         return CommentMapper.toShortDto(comment);
     }
 
-    private List<Comment> getCommentsByCondition(List<Specification> conditions, Pageable page) {
+    private List<Comment> getCommentsByCondition(List<Specification<Comment>> conditions, Pageable page) {
         List<Comment> comments;
 
         if (!conditions.isEmpty()) {
