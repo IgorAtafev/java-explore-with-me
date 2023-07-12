@@ -5,7 +5,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import ru.yandex.practicum.ewm.model.ParticipationRequestStatus;
 import ru.yandex.practicum.ewm.util.DateTimeUtils;
 
 import java.time.LocalDateTime;
@@ -14,15 +13,13 @@ import java.time.LocalDateTime;
 @Setter
 @EqualsAndHashCode
 @ToString
-public class ParticipationRequestDto {
+public class CommentShortDto {
 
     private Long id;
 
-    private Long event;
+    private String text;
 
-    private Long requester;
-
-    private ParticipationRequestStatus status;
+    private String authorName;
 
     @JsonFormat(pattern = DateTimeUtils.DATE_TIME_FORMAT)
     private LocalDateTime created;

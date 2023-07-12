@@ -5,10 +5,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.yandex.practicum.ewm.util.DateTimeUtils;
 
 import java.time.LocalDateTime;
-
-import static ru.yandex.practicum.ewm.util.Constants.DATE_TIME_FORMAT;
 
 @Getter
 @Setter
@@ -22,7 +21,7 @@ public class EventShortDto {
 
     private String annotation;
 
-    @JsonFormat(pattern = DATE_TIME_FORMAT)
+    @JsonFormat(pattern = DateTimeUtils.DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
 
     private CategoryDto category;
@@ -32,6 +31,8 @@ public class EventShortDto {
     private Boolean paid;
 
     private Integer confirmedRequests;
+
+    private Integer comments;
 
     private Long views;
 }

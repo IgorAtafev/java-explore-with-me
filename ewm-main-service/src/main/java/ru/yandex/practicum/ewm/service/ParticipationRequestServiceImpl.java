@@ -42,8 +42,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 () -> new NotFoundException(String.format("Event with id %d does not exist", eventId)));
 
         if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
-            throw new ConflictException(String.format(
-                    "Request with requester id %d and id %d exists", userId, eventId));
+            throw new ConflictException(String.format("Request with requester id %d and id %d exists",
+                    userId, eventId));
         }
 
         if (userId.equals(event.getInitiator().getId())) {

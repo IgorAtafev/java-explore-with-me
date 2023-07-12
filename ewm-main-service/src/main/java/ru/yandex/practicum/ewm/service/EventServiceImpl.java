@@ -11,6 +11,7 @@ import ru.yandex.practicum.ewm.dto.EventShortDto;
 import ru.yandex.practicum.ewm.dto.ViewStatsDto;
 import ru.yandex.practicum.ewm.mapper.EventMapper;
 import ru.yandex.practicum.ewm.model.Category;
+import ru.yandex.practicum.ewm.model.Comment;
 import ru.yandex.practicum.ewm.model.Event;
 import ru.yandex.practicum.ewm.model.EventSortType;
 import ru.yandex.practicum.ewm.model.EventState;
@@ -19,16 +20,18 @@ import ru.yandex.practicum.ewm.model.ParticipationRequest;
 import ru.yandex.practicum.ewm.model.ParticipationRequestStatus;
 import ru.yandex.practicum.ewm.model.User;
 import ru.yandex.practicum.ewm.repository.CategoryRepository;
+import ru.yandex.practicum.ewm.repository.CommentRepository;
 import ru.yandex.practicum.ewm.repository.EventRepository;
 import ru.yandex.practicum.ewm.repository.ParticipationRequestRepository;
 import ru.yandex.practicum.ewm.repository.UserRepository;
-import ru.yandex.practicum.ewm.specification.EventSpecification;
 import ru.yandex.practicum.ewm.util.EventRequestParam;
 import ru.yandex.practicum.ewm.util.StatsRequestParam;
 import ru.yandex.practicum.ewm.validator.ConflictException;
 import ru.yandex.practicum.ewm.validator.NotFoundException;
 import ru.yandex.practicum.ewm.validator.ValidationException;
 
+import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -47,6 +50,7 @@ public class EventServiceImpl implements  EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ParticipationRequestRepository requestRepository;
+    private final CommentRepository commentRepository;
     private final StatsService statsService;
 
     @Override
@@ -124,6 +128,7 @@ public class EventServiceImpl implements  EventService {
 
         List<Event> events = eventRepository.findByInitiatorId(userId, page);
         setConfirmedRequestsForEvents(events);
+        setCommentsForEvents(events);
 
         return EventMapper.toShortDtos(events);
     }
@@ -142,6 +147,8 @@ public class EventServiceImpl implements  EventService {
         event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
                 id, ParticipationRequestStatus.CONFIRMED));
 
+        event.setComments((int)commentRepository.countByEventId(id));
+
         return EventMapper.toFullDto(event);
     }
 
@@ -157,25 +164,27 @@ public class EventServiceImpl implements  EventService {
             eventStates = getEventStates(requestParam.getStates());
         }
 
-        List<Specification> conditions = new ArrayList<>();
+        List<Specification<Event>> conditions = new ArrayList<>();
 
         if (requestParam.getUsers() != null) {
-            conditions.add(EventSpecification.findByInitiatorIdIn(requestParam.getUsers()));
+            conditions.add((root, query, cb) -> cb.in(root.<Long>get("initiator").get("id"))
+                    .value(requestParam.getUsers()));
         }
 
         if (eventStates != null) {
-            conditions.add(EventSpecification.findByStatesIn(eventStates));
+            List<EventState> finalEventStates = eventStates;
+            conditions.add((root, query, cb) -> cb.in(root.get("state")).value(finalEventStates));
         }
 
         if (requestParam.getCategories() != null) {
-            conditions.add(EventSpecification.findByCategoryIdIn(requestParam.getCategories()));
+            conditions.add(findByCategoryIdIn(requestParam.getCategories()));
         }
 
         if (requestParam.getRangeStart() != null) {
-            conditions.add(EventSpecification.findByRangeStartGreaterThanEqual(requestParam.getRangeStart()));
+            conditions.add(findByRangeStartGreaterThanEqual(requestParam.getRangeStart()));
         }
         if (requestParam.getRangeEnd() != null) {
-            conditions.add(EventSpecification.findByRangeEndLessThanEqual(requestParam.getRangeEnd()));
+            conditions.add(findByRangeEndLessThanEqual(requestParam.getRangeEnd()));
         }
 
         List<Event> events = getEventsByCondition(conditions, page);
@@ -194,31 +203,31 @@ public class EventServiceImpl implements  EventService {
 
         EventSortType sortType = getSortType(requestParam.getSort());
 
-        List<Specification> conditions = new ArrayList<>();
+        List<Specification<Event>> conditions = new ArrayList<>();
 
-        conditions.add(EventSpecification.isPublished());
+        conditions.add(isPublished());
 
         if (requestParam.getText() != null) {
-            conditions.add(EventSpecification.findByTextContaining(requestParam.getText()));
+            conditions.add(findByTextContaining(requestParam.getText()));
         }
 
         if (requestParam.getCategories() != null) {
-            conditions.add(EventSpecification.findByCategoryIdIn(requestParam.getCategories()));
+            conditions.add(findByCategoryIdIn(requestParam.getCategories()));
         }
 
         if (requestParam.getPaid() != null) {
-            conditions.add(EventSpecification.findByPaid(requestParam.getPaid()));
+            conditions.add(findByPaid(requestParam.getPaid()));
         }
 
         if (requestParam.getOnlyAvailable() != null && Boolean.TRUE.equals(requestParam.getOnlyAvailable())) {
-            conditions.add(EventSpecification.findByOnlyAvailable());
+            conditions.add(findByOnlyAvailable());
         }
 
         if (requestParam.getRangeStart() != null) {
-            conditions.add(EventSpecification.findByRangeStartGreaterThanEqual(requestParam.getRangeStart()));
+            conditions.add(findByRangeStartGreaterThanEqual(requestParam.getRangeStart()));
         }
         if (requestParam.getRangeEnd() != null) {
-            conditions.add(EventSpecification.findByRangeEndLessThanEqual(requestParam.getRangeEnd()));
+            conditions.add(findByRangeEndLessThanEqual(requestParam.getRangeEnd()));
         }
 
         List<Event> events = getEventsByCondition(conditions, page);
@@ -243,6 +252,8 @@ public class EventServiceImpl implements  EventService {
 
         event.setConfirmedRequests((int)requestRepository.countByEventIdAndStatus(
                 id, ParticipationRequestStatus.CONFIRMED));
+
+        event.setComments((int)commentRepository.countByEventId(id));
 
         statsService.saveEndpointHit(request);
         event.setViews(getViewForEvent(event.getPublishedOn(), request));
@@ -394,7 +405,28 @@ public class EventServiceImpl implements  EventService {
         }
     }
 
-    private List<Event> getEventsByCondition(List<Specification> conditions, Pageable page) {
+    private void setCommentsForEvents(List<Event> events) {
+        if (events.isEmpty()) {
+            return;
+        }
+
+        List<Long> eventIds = events.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, List<Comment>> comments = commentRepository.findByEventIdIn(eventIds).stream()
+                .collect(Collectors.groupingBy(item -> item.getEvent().getId()));
+
+        events.forEach(event -> setCommentsForEvent(event, comments.get(event.getId())));
+    }
+
+    private void setCommentsForEvent(Event event, List<Comment> comments) {
+        if (comments != null) {
+            event.setComments(comments.size());
+        }
+    }
+
+    private List<Event> getEventsByCondition(List<Specification<Event>> conditions, Pageable page) {
         List<Event> events;
 
         if (!conditions.isEmpty()) {
@@ -409,6 +441,7 @@ public class EventServiceImpl implements  EventService {
         }
 
         setConfirmedRequestsForEvents(events);
+        setCommentsForEvents(events);
 
         return events;
     }
@@ -472,5 +505,51 @@ public class EventServiceImpl implements  EventService {
 
             event.setViews(hits.get(0).getHits());
         }
+    }
+
+    private Specification<Event> findByCategoryIdIn(List<Long> categories) {
+        return (root, query, cb) -> cb.in(root.<Long>get("category").get("id")).value(categories);
+    }
+
+    private Specification<Event> findByTextContaining(String text) {
+        return (root, query, cb) -> cb.or(
+                cb.like(cb.upper(root.get("annotation")), "%" + text.toUpperCase() + "%"),
+                cb.like(cb.upper(root.get("description")), "%" + text.toUpperCase() + "%")
+        );
+    }
+
+    private Specification<Event> isPublished() {
+        return (root, query, cb) -> cb.equal(root.get("state"), EventState.PUBLISHED);
+    }
+
+    private Specification<Event> findByPaid(Boolean paid) {
+        if (Boolean.TRUE.equals(paid)) {
+            return (root, query, cb) -> cb.isTrue(root.get("paid"));
+        }
+
+        return (root, query, cb) -> cb.isFalse(root.get("paid"));
+    }
+
+    private Specification<Event> findByOnlyAvailable() {
+        return (root, query, cb) -> {
+            Subquery<Long> subQuery = query.subquery(Long.class);
+            Root<ParticipationRequest> subRoot = subQuery.from(ParticipationRequest.class);
+
+            subQuery.select(cb.count(subRoot.get("id")))
+                    .where(cb.equal(root.get("id"), subRoot.<Long>get("event").get("id")));
+
+            return cb.and(
+                    cb.greaterThan(root.get("participantLimit"), 0),
+                    cb.lessThan(root.get("participantLimit"), subQuery)
+            );
+        };
+    }
+
+    private Specification<Event> findByRangeStartGreaterThanEqual(LocalDateTime rangeStart) {
+        return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("eventDate"), rangeStart);
+    }
+
+    private Specification<Event> findByRangeEndLessThanEqual(LocalDateTime rangeEnd) {
+        return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("eventDate"), rangeEnd);
     }
 }
