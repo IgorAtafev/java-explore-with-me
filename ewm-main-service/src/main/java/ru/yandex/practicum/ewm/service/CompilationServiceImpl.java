@@ -90,7 +90,7 @@ public class CompilationServiceImpl implements CompilationService {
             events = Collections.emptyList();
         }
 
-        if (compilationForRequestDto.getId() != null) {
+        if (oldCompilation != null) {
             if (compilationForRequestDto.getTitle() == null) {
                 compilation.setTitle(oldCompilation.getTitle());
             }
